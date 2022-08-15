@@ -340,7 +340,7 @@ Using Bob's kubeconfig...
 ```
 kubectl get nodes
 ```
-## [](https://github.com/tadeugr/aks-references/tree/master/Kubernetes-users#references)References
+## References
 
 ### [](https://github.com/tadeugr/aks-references/tree/master/Kubernetes-users#request-signing-process)Request signing process
 
@@ -349,3 +349,6 @@ kubectl get nodes
 ### [](https://github.com/tadeugr/aks-references/tree/master/Kubernetes-users#a-practical-approach-to-understanding-kubernetes-authentication)A Practical Approach to Understanding Kubernetes Authentication
 
 [https://thenewstack.io/a-practical-approach-to-understanding-kubernetes-authentication/](https://thenewstack.io/a-practical-approach-to-understanding-kubernetes-authentication/)
+
+### aks-references
+https://github.com/tadeugr/aks-references
