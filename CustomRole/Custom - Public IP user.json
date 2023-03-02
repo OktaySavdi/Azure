@@ -1,0 +1,20 @@
+{
+    "properties": {
+        "roleName": "Custom - Public IP user",
+        "description": "Can read and write public IPs.",
+        "assignableScopes": [
+            "/providers/Microsoft.Management/managementGroups/<managementGroups_names>"
+        ],
+        "permissions": [
+            {
+                "actions": [
+                    "Microsoft.Network/publicIPAddresses/read",
+                    "Microsoft.Network/publicIPAddresses/write"
+                ],
+                "notActions": [],
+                "dataActions": [],
+                "notDataActions": []
+            }
+        ]
+    }
+}
