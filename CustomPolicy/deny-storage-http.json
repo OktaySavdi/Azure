@@ -1,0 +1,33 @@
+{
+  "properties": {
+    "displayName": "deny-storage-http",
+    "policyType": "Custom",
+    "mode": "All",
+    "metadata": {
+      "category": "ACF-Storage"
+    },
+    "parameters": {},
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.Storage/storageAccounts"
+          },
+          {
+            "not": {
+              "field": "Microsoft.Storage/storageAccounts/supportsHttpsTrafficOnly",
+              "equals": "true"
+            }
+          }
+        ]
+      },
+      "then": {
+        "effect": "Deny"
+      }
+    }
+  },
+  "id": "/providers/Microsoft.Management/managementGroups/Audit/providers/Microsoft.Authorization/policyDefinitions/deny-storage-http",
+  "type": "Microsoft.Authorization/policyDefinitions",
+  "name": "deny-storage-http"
+}
