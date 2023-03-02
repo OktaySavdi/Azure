@@ -1,0 +1,44 @@
+{
+    "properties": {
+        "roleName": "Custom - Private DNS Zone Contributor",
+        "description": "Can manage private DNS zone resources.",
+        "assignableScopes": [
+            "/providers/Microsoft.Management/managementGroups/<managementGroups_name>"
+        ],
+        "permissions": [
+            {
+                "actions": [
+                    "Microsoft.Network/virtualNetworks/read",
+                    "Microsoft.Network/virtualNetworks/join/action",
+                    "Microsoft.Network/virtualNetworks/subnets/read",
+                    "Microsoft.Network/privateDnsZones/ALL/read",
+                    "Microsoft.Network/privateDnsOperationResults/read",
+                    "Microsoft.Network/privateDnsOperationStatuses/read",
+                    "Microsoft.Network/privateDnsZones/virtualNetworkLinks/write",
+                    "Microsoft.Network/privateDnsZones/virtualNetworkLinks/read",
+                    "Microsoft.Network/privateDnsZones/read",
+                    "Microsoft.Network/privateDnsZones/write",
+                    "Microsoft.Network/privateDnsZones/A/write",
+                    "Microsoft.Network/privateDnsZones/A/read",
+                    "Microsoft.Network/privateDnsZones/AAAA/write",
+                    "Microsoft.Network/privateDnsZones/AAAA/read",
+                    "Microsoft.Network/privateDnsZones/CNAME/write",
+                    "Microsoft.Network/privateDnsZones/CNAME/read",
+                    "Microsoft.Network/privateDnsZones/MX/write",
+                    "Microsoft.Network/privateDnsZones/MX/read",
+                    "Microsoft.Network/privateDnsZones/PTR/write",
+                    "Microsoft.Network/privateDnsZones/PTR/read",
+                    "Microsoft.Network/privateDnsZones/SOA/write",
+                    "Microsoft.Network/privateDnsZones/SOA/read",
+                    "Microsoft.Network/privateDnsZones/SRV/write",
+                    "Microsoft.Network/privateDnsZones/SRV/read",
+                    "Microsoft.Network/privateDnsZones/TXT/write",
+                    "Microsoft.Network/privateDnsZones/TXT/read"
+                ],
+                "notActions": [],
+                "dataActions": [],
+                "notDataActions": []
+            }
+        ]
+    }
+}
