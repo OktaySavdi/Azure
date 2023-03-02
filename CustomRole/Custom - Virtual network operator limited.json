@@ -1,0 +1,27 @@
+{
+    "properties": {
+        "roleName": "Custom - Virtual network operator limited",
+        "description": "Can join VMs (NICs) to a Virtual Network.",
+        "assignableScopes": [
+            "/providers/Microsoft.Management/managementGroups/<managementGroups_name>"
+        ],
+        "permissions": [
+            {
+                "actions": [
+                    "Microsoft.Network/virtualNetworks/read",
+                    "Microsoft.Network/virtualNetworks/subnets/read",
+                    "Microsoft.Network/virtualNetworks/subnets/join/action"
+                ],
+                "notActions": [
+                    "Microsoft.Network/networkSecurityGroups/write",
+                    "Microsoft.Network/networkSecurityGroups/delete",
+                    "Microsoft.Network/networkSecurityGroups/join/action",
+                    "Microsoft.Network/networkSecurityGroups/securityRules/write",
+                    "Microsoft.Network/networkSecurityGroups/securityRules/delete"
+                ],
+                "dataActions": [],
+                "notDataActions": []
+            }
+        ]
+    }
+}
