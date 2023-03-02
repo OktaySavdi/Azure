@@ -1,0 +1,27 @@
+{
+    "properties": {
+        "roleName": "Custom - Security operator",
+        "description": "Platform-wide security administrator",
+        "assignableScopes": [
+            "/providers/Microsoft.Management/managementGroups/<managementGroups>"
+        ],
+        "permissions": [
+            {
+                "actions": [
+                    "*/read",
+                    "*/register/action",
+                    "Microsoft.KeyVault/locations/deletedVaults/purge/action",
+                    "Microsoft.Insights/alertRules/*",
+                    "Microsoft.Authorization/policyDefinitions/*",
+                    "Microsoft.Authorization/policyAssignments/*",
+                    "Microsoft.Authorization/policySetDefinitions/*",
+                    "Microsoft.PolicyInsights/*",
+                    "Microsoft.Security/*"
+                ],
+                "notActions": [],
+                "dataActions": [],
+                "notDataActions": []
+            }
+        ]
+    }
+}
