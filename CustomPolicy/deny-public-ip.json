@@ -1,0 +1,31 @@
+{
+  "properties": {
+    "displayName": "deny-public-ip",
+    "policyType": "Custom",
+    "mode": "All",
+    "metadata": {
+      "category": "ACF-Network"
+    },
+    "parameters": {},
+    "policyRule": {
+      "if": {
+        "anyOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.Network/publicIPAddresses"
+          },
+          {
+            "field": "type",
+            "equals": "Microsoft.Network/publicIPPrefixes"
+          }
+        ]
+      },
+      "then": {
+        "effect": "deny"
+      }
+    }
+  },
+  "id": "/providers/Microsoft.Management/managementGroups/Production/providers/Microsoft.Authorization/policyDefinitions/deny-public-ip",
+  "type": "Microsoft.Authorization/policyDefinitions",
+  "name": "deny-public-ip"
+}
