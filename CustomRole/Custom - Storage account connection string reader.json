@@ -1,0 +1,19 @@
+{
+    "properties": {
+        "roleName": "Custom - Storage account connection string reader",
+        "description": "Can read storage account connection strings.",
+        "assignableScopes": [
+            "/providers/Microsoft.Management/managementGroups/<managementGroups_name>"
+        ],
+        "permissions": [
+            {
+                "actions": [
+                    "Microsoft.Storage/storageAccounts/listKeys/action"
+                ],
+                "notActions": [],
+                "dataActions": [],
+                "notDataActions": []
+            }
+        ]
+    }
+}
