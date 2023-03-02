@@ -1,0 +1,19 @@
+{
+    "properties": {
+        "roleName": "Custom - Storage Account Get/List",
+        "description": "Returns the list of storage accounts or gets the properties for the specified storage account.",
+        "assignableScopes": [
+            "/providers/Microsoft.Management/managementGroups/<managementGroups_name>"
+        ],
+        "permissions": [
+            {
+                "actions": [
+                    "Microsoft.Storage/storageAccounts/read"
+                ],
+                "notActions": [],
+                "dataActions": [],
+                "notDataActions": []
+            }
+        ]
+    }
+}
