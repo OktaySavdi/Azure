@@ -1,0 +1,35 @@
+{
+  "properties": {
+    "displayName": "deny-keyvault-allow-all",
+    "policyType": "Custom",
+    "mode": "All",
+    "metadata": {
+      "category": "ACF-Key Vault"
+    },
+    "parameters": {},
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.KeyVault/vaults"
+          },
+          {
+            "field": "Microsoft.KeyVault/vaults/networkAcls.defaultAction",
+            "notEquals": "Deny"
+          },
+          {
+            "field": "Microsoft.KeyVault/vaults/networkAcls.ipRules[*].value",
+            "equals": ""
+          }
+        ]
+      },
+      "then": {
+        "effect": "deny"
+      }
+    }
+  },
+  "id": "/providers/Microsoft.Management/managementGroups/Production/providers/Microsoft.Authorization/policyDefinitions/deny-keyvault-allow-all",
+  "type": "Microsoft.Authorization/policyDefinitions",
+  "name": "deny-keyvault-allow-all"
+}
