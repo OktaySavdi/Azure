@@ -1,0 +1,33 @@
+{
+    "properties": {
+        "roleName": "Custom - Limited Owner",
+        "description": "Can do anything except modify Policies, Management Groups and RBAC roles.",
+        "assignableScopes": [
+            "/providers/Microsoft.Management/managementGroups/<managementGroups_name>"
+        ],
+        "permissions": [
+            {
+                "actions": [
+                    "*"
+                ],
+                "notActions": [
+                    "Microsoft.Authorization/classicAdministrators/write",
+                    "Microsoft.Authorization/elevateAccess/action",
+                    "Microsoft.Authorization/policyDefinitions/write",
+                    "Microsoft.Authorization/policyDefinitions/delete",
+                    "Microsoft.Authorization/policyAssignments/write",
+                    "Microsoft.Authorization/policyAssignments/delete",
+                    "Microsoft.Authorization/policySetDefinitions/write",
+                    "Microsoft.Authorization/policySetDefinitions/delete",
+                    "Microsoft.Authorization/roleDefinitions/delete",
+                    "Microsoft.Authorization/roleDefinitions/write",
+                    "Microsoft.Management/managementGroups/subscriptions/delete",
+                    "Microsoft.Management/managementGroups/subscriptions/write",
+                    "Microsoft.Management/managementGroups/write"
+                ],
+                "dataActions": [],
+                "notDataActions": []
+            }
+        ]
+    }
+}
