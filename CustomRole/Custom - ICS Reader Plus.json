@@ -1,0 +1,22 @@
+{
+    "properties": {
+        "roleName": "Custom - ICS Reader Plus",
+        "description": "New custom role for InsightCloudSec service principal",
+        "assignableScopes": [
+            "/providers/Microsoft.Management/managementGroups/<managementGroups_name>"
+        ],
+        "permissions": [
+            {
+                "actions": [
+                    "*/read",
+                    "Microsoft.ContainerRegistry/registries/pull/read",
+                    "Microsoft.Web/sites/config/list/Action",
+                    "Microsoft.Web/sites/slots/config/list/Action"
+                ],
+                "notActions": [],
+                "dataActions": [],
+                "notDataActions": []
+            }
+        ]
+    }
+}
