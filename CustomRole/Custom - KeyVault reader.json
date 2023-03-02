@@ -1,0 +1,19 @@
+{
+    "properties": {
+        "roleName": "Custom - KeyVault reader",
+        "description": "Can read key vault secrets if access policies are set.",
+        "assignableScopes": [
+            "/providers/Microsoft.Management/managementGroups/<managementGroups_name>"
+        ],
+        "permissions": [
+            {
+                "actions": [
+                    "Microsoft.KeyVault/vaults/deploy/action"
+                ],
+                "notActions": [],
+                "dataActions": [],
+                "notDataActions": []
+            }
+        ]
+    }
+}
