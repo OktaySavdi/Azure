@@ -1,0 +1,24 @@
+{
+    "properties": {
+        "roleName": "Custom - Application owner",
+        "description": "Application owner with reduced access to network and key vault",
+        "assignableScopes": [
+            "/providers/Microsoft.Management/managementGroups/Greentube"
+        ],
+        "permissions": [
+            {
+                "actions": [
+                    "*"
+                ],
+                "notActions": [
+                    "Microsoft.Authorization/*/write",
+                    "Microsoft.Network/publicIPAddresses/write",
+                    "Microsoft.Network/virtualNetworks/write",
+                    "Microsoft.KeyVault/locations/deletedVaults/purge/action"
+                ],
+                "dataActions": [],
+                "notDataActions": []
+            }
+        ]
+    }
+}
