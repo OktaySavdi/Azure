@@ -7,6 +7,7 @@ This Terraform module deploys a Kubernetes cluster on Azure using AKS (Azure Kub
 
 ## Usage in Terraform 0.13
 
+main.tf
 ```hcl
 ### Data sources ####
 data "azurerm_user_assigned_identity" "manage_identity" {
