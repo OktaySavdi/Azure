@@ -1,7 +1,7 @@
 
 #First console
 ```
-CLUSTER_RESOURCE_GROUP=$(az aks show --resource-group azweu-rg-hce-test-01 --name os1 --query nodeResourceGroup -o tsv)
+CLUSTER_RESOURCE_GROUP=$(az aks show --resource-group <rg_name> --name <cluster_name> --query nodeResourceGroup -o tsv)
 ```  
 ```
 SCALE_SEt_NAME=$(az vmss list --resource-group $CLUSTER_RESOURCE_GROUP --query [0].name -o tsv)
