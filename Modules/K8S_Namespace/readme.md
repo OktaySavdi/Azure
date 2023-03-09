@@ -35,6 +35,14 @@ provider "kubectl" {
 #  config_context = "az-aks-hce-aks-stg-01-admin"
 #}
 
+#provider "kubernetes" {
+#  host = "https://104.196.242.174"
+#
+#  client_certificate     = "${file("~/.kube/client-cert.pem")}"
+#  client_key             = "${file("~/.kube/client-key.pem")}"
+#  cluster_ca_certificate = "${file("~/.kube/cluster-ca-cert.pem")}"
+#}
+
 module "namespace" {
   source = "git::https://<git_address>/hce-public/modules.git//K8S_Namespace"
 
