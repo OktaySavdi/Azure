@@ -26,7 +26,7 @@ data "azurerm_key_vault_secret" "harbor_token" {
 ###
 provider "harbor" {
   url      = var.harbor_project_url
-  username = var.harbor_project_user_name
+  username = "admin"
   password = data.azurerm_key_vault_secret.harbor_token.value
   insecure = true
 }
