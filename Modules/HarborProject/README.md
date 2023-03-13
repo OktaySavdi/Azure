@@ -43,7 +43,7 @@ module "harbor-project" {
 }
 ```
 variables
-```
+```hcl
 variable key_vault_secret_name {
   description   = "key_vault_secret_name. Possible values are harbor-stg and harbor-prod"
   type          = string
