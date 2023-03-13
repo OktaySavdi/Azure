@@ -11,7 +11,7 @@ provider "azurerm" {
 }
 
 module "harbor-project" {
-  source                = "git::https://ato-hce-git1.gtoffice.lan/hce-public/modules.git//HarborProject"
+  source                = "git::https://<git_address>/hce-public/modules.git//HarborProject"
   key_vault_secret_name = var.key_vault_secret_name
 
   define_group = {
