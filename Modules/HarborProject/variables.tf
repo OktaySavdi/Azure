@@ -3,10 +3,10 @@ variable "key_vault_secret_name" {
   description = "azure prod env name of vault"
 
   validation {
-    condition = var.key_vault_name == null ? true : contains([
+    condition = var.key_vault_secret_name == null ? true : contains([
       "harbor-stg", "harbor-prod"
-    ], var.key_vault_name)
-    error_message = "`key_vault_name`'s possible values are `harbor-stg`, `harbor-prod`"
+    ], var.key_vault_secret_name)
+    error_message = "`key_vault_secret_name`'s possible values are `harbor-stg`, `harbor-prod`"
   }
 }
 
@@ -25,20 +25,8 @@ variable "storage_quota" {
   description = "harbor registry repo size information example: 5"
 
   validation {
-    condition     = var.storage_quota >= 20
+    condition     = var.storage_quota < 20
     error_message = "`storage_quota` must be less than 20 GB"
-  }
-}
-
-variable "image_retention_policy" {
-  type        = map(string)
-  description = "information about retantion policy"
-
-  validation {
-    condition = var.image_retention_policy == null ? true : contains([
-      "daily", "weekly", "monthly"
-    ], var.image_retention_policy)
-    error_message = "`image_retention_policy`'s possible values are `daily`, `weekly`, `monthly`"
   }
 }
 
@@ -57,21 +45,7 @@ variable "harbor_project_url" {
   description = "URL of harbor project"
 }
 
-variable "harbor_project_user_name" {
-  type        = string
-  description = "username to access harbor project url"
-
-  validation {
-    condition = var.public == null ? true : contains([
-      "true", "false"
-    ], var.public)
-    error_message = "`public`'s possible values are `true`, `false`"
-  }
-
-  validation {
-    condition = var.vulnerability_scanning == null ? true : contains([
-      "true", "false"
-    ], var.vulnerability_scanning)
-    error_message = "`vulnerability_scanning`'s possible values are `true`, `false`"
-  }
+variable "image_retention_policy" {
+  type        = map(string)
+  description = "information about retantion policy"
 }
