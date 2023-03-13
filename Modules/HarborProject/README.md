@@ -11,24 +11,24 @@ provider "azurerm" {
 }
 
 module "harbor-project" {
-  source  =                  "git::https://<git_address>/hce-public/modules.git//HarborProject"
-  key_vault_secret_name =    var.key_vault_secret_name
-  
-  define_group =             {
+  source                = "git::https://ato-hce-git1.gtoffice.lan/hce-public/modules.git//HarborProject"
+  key_vault_secret_name = var.key_vault_secret_name
+
+  define_group = {
     group1 = {
-      group_name             = var.define_group.group_name
-      role                   = var.define_group.role
-      ldap_group_dn          = var.define_group.ldap_group_dn
+      group_name    = var.define_group.group_name
+      role          = var.define_group.role
+      ldap_group_dn = var.define_group.ldap_group_dn
     }
   }
 
-  harbor_project_name =      {
-    "name" = var.harbor_project_name.name
-    "public" = var.harbor_project_name.public
+  harbor_project_name = {
+    "name"                   = var.harbor_project_name.name
+    "public"                 = var.harbor_project_name.public
     "vulnerability_scanning" = var.harbor_project_name.vulnerability_scanning
   }
-  
-  image_retention_policy =   {
+
+  image_retention_policy = {
     "disabled"               = var.image_retention_policy.disabled
     "schedule"               = var.image_retention_policy.schedule
     "n_days_since_last_pull" = var.image_retention_policy.n_days_since_last_pull
@@ -37,10 +37,9 @@ module "harbor-project" {
   }
 
   storage_quota            = var.storage_quota
-  key_vault_name           = "<keyvault_name>"
-  resource_group_name      = "<resourcegroup_name>"
+  key_vault_name           = "azgwc-kv-gtit-hce-prod"
+  resource_group_name      = "azgwc-rg-gtit-hce-prod-01"
   harbor_project_url       = var.harbor_project_url
-  harbor_project_user_name = "admin"
 }
 ```
 variables
@@ -66,18 +65,18 @@ variable harbor_project_url {
 variable "define_group" {
   type = map(string)
   default = {
-    "group_name"            = "Matrix"        # (Required) The of the project that will be created in harbor (must be lowercase).
-    "role"                  = "projectadmin"  # (Required) The premissions that the entity will be granted.
-	  "ldap_group_dn"         = "CN=<my_CN>,OU=RoleGroups,OU=<my_OU>,DC=<my_DC>,DC=<my_DC>" # The distinguished name of the group within AD/LDAP
+    "group_name"            = "<my group name>"        # (Required) The of the project that will be created in harbor (must be lowercase).
+    "role"                  = "projectadmin"           # (Required) The premissions that the entity will be granted.
+    "ldap_group_dn"         = "CN=<my_CN>,OU=RoleGroups,OU=<my_OU>,DC=<my_DC>,DC=<my_DC>" # The distinguished name of the group within AD/LDAP
   }
 }
 
 variable "harbor_project_name" {
   type = map(string)
   default = {
-    "name"                   = "matrix_example"  # (Required) The of the project that will be created in harbor (must be lowercase).
+    "name"                   = "<repo name>"     # (Required) The of the project that will be created in harbor (must be lowercase).
     "public"                 = true              # (Optional) The project will be public accessibility. Can be set to "true" or "false"
-  	"vulnerability_scanning" = true              # (Optional) Images will be scanned for vulnerabilities when push to harbor. Can be set to "true" or "false"
+    "vulnerability_scanning" = true              # (Optional) Images will be scanned for vulnerabilities when push to harbor. Can be set to "true" or "false"
   }
 }
 
