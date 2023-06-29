@@ -46,19 +46,19 @@ variable "define_group" {
 
   default = [
     {
-    "group_name"    = "<my group name>"                                                         # (Required) The of the project that will be created in harbor (must be lowercase).
-    "role"          = "projectadmin"                                                            # (Required) The premissions that the entity will be granted.
-    "ldap_group_dn" = "CN=<my_CN>,OU=RoleGroups,OU=<my_OU>,DC=<my_DC>,DC=<my_DC>"               # The distinguished name of the group within AD/LDAP
+      "group_name"    = "<my group name>"                                                         # (Required) The of the project that will be created in harbor (must be lowercase).
+      "role"          = "projectadmin"                                                            # (Required) The premissions that the entity will be granted.
+      "ldap_group_dn" = "CN=<my_CN>,OU=RoleGroups,OU=<my_OU>,DC=<my_DC>,DC=<my_DC>"               # The distinguished name of the group within AD/LDAP
     },
     {
-    "group_name"    = "<my group name>"
-    "role"          = "projectadmin"
-    "ldap_group_dn" = "CN=<my_CN>,OU=RoleGroups,OU=<my_OU>,DC=<my_DC>,DC=<my_DC>"
+      "group_name"    = "<my group name>"
+      "role"          = "projectadmin"
+      "ldap_group_dn" = "CN=<my_CN>,OU=RoleGroups,OU=<my_OU>,DC=<my_DC>,DC=<my_DC>"
     },
     {
-    "group_name"    = "<my group name>"
-    "role"          = "projectadmin"
-    "ldap_group_dn" = "CN=<my_CN>,OU=RoleGroups,OU=<my_OU>,DC=<my_DC>,DC=<my_DC>"
+      "group_name"    = "<my group name>"
+      "role"          = "projectadmin"
+      "ldap_group_dn" = "CN=<my_CN>,OU=RoleGroups,OU=<my_OU>,DC=<my_DC>,DC=<my_DC>"
     }
   ]
 }
