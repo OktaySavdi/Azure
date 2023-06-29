@@ -16,8 +16,13 @@ variable "key_vault_secret_name" {
 }
 
 variable "define_group" {
-  type        = map(any)
   description = "azure prod env name of vault"
+  type = list(object({
+    group_name    = string
+    role          = string
+    ldap_group_dn = string
+  }))
+  default = []
 }
 
 variable "key_vault_name" {
