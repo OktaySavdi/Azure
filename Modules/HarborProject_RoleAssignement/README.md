@@ -5,27 +5,16 @@ Terraform module for creating harbor projects.
 ## Module Usage
 
 ```hcl
-# Azurerm provider configuration
-provider "azurerm" {
-  features {}
-}
-
 module "harbor-project" {
-  source                = "git::https://<git_address>/hce-public/modules.git//HarborProject_RoleAssignement"
+  source                = "git::https://ato-hce-git1.gtoffice.lan/hce-public/modules.git//HarborProject_RoleAssignement"
   key_vault_secret_name = var.key_vault_secret_name
 
-  define_group = {
-    group1 = {
-      group_name    = var.define_group.group_name
-      role          = var.define_group.role
-      ldap_group_dn = var.define_group.ldap_group_dn
-    }
-  }
+  define_group = var.define_group
 
-  key_vault_name           = "azgwc-kv-gtit-hce-prod"
-  resource_group_name      = "azgwc-rg-gtit-hce-prod-01"
-  harbor_project_url       = var.harbor_project_url
-  harbor_project_name      = var.harbor_project_name
+  key_vault_name      = "azgwc-kv-gtit-hce-prod"
+  resource_group_name = "azgwc-rg-gtit-hce-prod-01"
+  harbor_project_url  = var.harbor_project_url
+  harbor_project_name = var.harbor_project_name
 }
 ```
 variables
@@ -49,12 +38,29 @@ variable "harbor_project_url" {
 }
 
 variable "define_group" {
-  type = map(string)
-  default = {
+  type = list(object({
+    group_name    = string
+    role          = string
+    ldap_group_dn = string
+  }))
+
+  default = [
+    {
     "group_name"    = "<my group name>"                                                         # (Required) The of the project that will be created in harbor (must be lowercase).
     "role"          = "projectadmin"                                                            # (Required) The premissions that the entity will be granted.
     "ldap_group_dn" = "CN=<my_CN>,OU=RoleGroups,OU=<my_OU>,DC=<my_DC>,DC=<my_DC>"               # The distinguished name of the group within AD/LDAP
-  }
+    },
+    {
+    "group_name"    = "<my group name>"
+    "role"          = "projectadmin"
+    "ldap_group_dn" = "CN=<my_CN>,OU=RoleGroups,OU=<my_OU>,DC=<my_DC>,DC=<my_DC>"
+    },
+    {
+    "group_name"    = "<my group name>"
+    "role"          = "projectadmin"
+    "ldap_group_dn" = "CN=<my_CN>,OU=RoleGroups,OU=<my_OU>,DC=<my_DC>,DC=<my_DC>"
+    }
+  ]
 }
 ```
 providers
