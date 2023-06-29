@@ -5,9 +5,9 @@ data "harbor_project" "main" {
 resource "harbor_project_member_group" "harborprojectmembergroup" {
   project_id = data.harbor_project.main.id
 
-  for_each      = var.define_group
-  group_name    = each.value.group_name
-  role          = each.value.role
+  count         = length(var.define_group)
   type          = "ldap"
-  ldap_group_dn = each.value.ldap_group_dn
+  group_name    = var.define_group[count.index].group_name
+  role          = var.define_group[count.index].role
+  ldap_group_dn = var.define_group[count.index].ldap_group_dn
 }
