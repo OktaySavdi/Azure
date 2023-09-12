@@ -1,5 +1,6 @@
 ```
 #Resource Group
+terraform import module.vnet.azurerm_virtual_network.vnet /subscriptions/<subscription>/resourceGroups/<resource_group_name>
 terraform import azurerm_resource_group.rg_name /subscriptions/<subscription>/resourceGroups/<resource_group_name>
 
 #Vnet
