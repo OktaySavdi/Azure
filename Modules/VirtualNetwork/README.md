@@ -14,7 +14,7 @@ Terraform module used to create following resourses. This module will be used, w
 ```hcl
 # main.tf configuration
 module "vnet" {
-  source  = "git::https://ato-hce-git1.gtoffice.lan/hce-public/modules.git//VirtualNetwork?ref=v3.44.1"
+  source  = "git::https://myrepo.lan/modules.git//VirtualNetwork?ref=v3.44.1"
   providers = {
     azurerm = azurerm.subscription
   }
