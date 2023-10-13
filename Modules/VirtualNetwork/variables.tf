@@ -1,6 +1,6 @@
 variable "resource_group_name" {
   description = "A container that holds related resources for an Azure solution"
-  default     = "az-rg-hce-test-01"
+  default     = "rg-demo-westeurope-01"
 }
 
 variable "location" {
@@ -16,6 +16,11 @@ variable "vnet_name" {
 variable "rt_name" {
   description = "Name of Route Table"
   default     = ""
+}
+
+variable "route_tables" {
+  description = "For each route, create an object that contain fields"
+  default     = {}
 }
 
 variable "vnet_address_space" {
@@ -37,4 +42,9 @@ variable "tags" {
   description = "A map of tags to add to all resources"
   type        = map(string)
   default     = {}
+}
+
+variable "disk_access_name" {
+  description = "disk access name"
+  default     = ""
 }
