@@ -1,0 +1,32 @@
+{
+  "properties": {
+    "displayName": "deny-storage-unencrypt",
+    "policyType": "Custom",
+    "mode": "All",
+    "metadata": {
+      "category": "ACF-Storage"
+    },
+    "parameters": {},
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.Storage/storageAccounts"
+          },
+          {
+            "field": "Microsoft.Storage/storageAccounts/enableBlobEncryption",
+            "equals": "false"
+          }
+        ]
+      },
+      "then": {
+        "effect": "Deny"
+      }
+    }
+  },
+  "id": "/providers/Microsoft.Management/managementGroups/Production/providers/Microsoft.Authorization/policyDefinitions/deny-storage-unencrypt",
+  "type": "Microsoft.Authorization/policyDefinitions",
+  "name": "deny-storage-unencrypt"
+  }
+}
