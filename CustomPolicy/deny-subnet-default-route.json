@@ -1,0 +1,63 @@
+{
+  "properties": {
+    "displayName": "deny-subnet-default-route",
+    "policyType": "Custom",
+    "mode": "All",
+    "metadata": {
+      "category": "ACF-Network"
+    },
+    "parameters": {
+      "firewallIpAddresses": {
+        "type": "array"
+      }
+    },
+    "policyRule": {
+      "if": {
+        "anyOf": [
+          {
+            "allOf": [
+              {
+                "field": "type",
+                "equals": "Microsoft.Network/routeTables/routes"
+              },
+              {
+                "field": "Microsoft.Network/routeTables/routes/addressPrefix",
+                "equals": "0.0.0.0/0"
+              },
+              {
+                "anyOf": [
+                  {
+                    "field": "Microsoft.Network/routeTables/routes/nextHopType",
+                    "notEquals": "VirtualAppliance"
+                  },
+                  {
+                    "field": "Microsoft.Network/routeTables/routes/nextHopIpAddress",
+                    "notIn": "[parameters('firewallIpAddresses')]"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "allOf": [
+              {
+                "field": "type",
+                "equals": "Microsoft.Network/routeTables/routes"
+              },
+              {
+                "field": "Microsoft.Network/routeTables/routes/addressPrefix",
+                "notEquals": "0.0.0.0/0"
+              }
+            ]
+          }
+        ]
+      },
+      "then": {
+        "effect": "deny"
+      }
+    }
+  },
+  "id": "/providers/Microsoft.Management/managementGroups/Production/providers/Microsoft.Authorization/policyDefinitions/deny-subnet-default-route",
+  "type": "Microsoft.Authorization/policyDefinitions",
+  "name": "deny-subnet-default-route"
+}
