@@ -1,0 +1,30 @@
+{
+  "properties": {
+    "displayName": "deny-disk-public-access",
+    "policyType": "Custom",
+    "mode": "All",
+    "metadata": {
+      "version": "1.0.0"
+    },
+    "parameters": {},
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.Compute/disks"
+          },
+          {
+            "field": "Microsoft.Compute/disks/publicNetworkAccess",
+            "equals": "Enabled"
+          }
+        ]
+      },
+      "then": {
+        "effect": "deny"
+      }
+    }
+  },
+  "id": "/providers/Microsoft.Management/managementGroups/Production/providers/Microsoft.Authorization/policyDefinitions/e0e5aa94-de7b-4687-b43b-dfe67e56c852",
+  "type": "Microsoft.Authorization/policyDefinitions"
+}
