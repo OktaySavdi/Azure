@@ -1,0 +1,160 @@
+{
+  "properties": {
+    "displayName": "dine-subscription-log-shipping-sa",
+    "policyType": "Custom",
+    "mode": "All",
+    "metadata": {
+      "category": "ACF-Monitoring",
+      "createdBy": "4e74eeff-5eed-4754-ac9c-f77c21de9ff1",
+      "createdOn": "2022-02-22T14:12:33.5242769Z",
+      "updatedBy": "4e74eeff-5eed-4754-ac9c-f77c21de9ff1",
+      "updatedOn": "2022-06-30T12:22:14.1247778Z"
+    },
+    "parameters": {
+      "storageAccountName": {
+        "type": "string",
+        "metadata": {
+          "displayName": "storageAccountName",
+          "description": "Storage Account where the logs will be archived"
+        }
+      },
+      "subscriptionId": {
+        "type": "string",
+        "metadata": {
+          "displayName": "subscriptionId",
+          "description": "subscriptionId where the SA exists"
+        }
+      },
+      "resourceGroupName": {
+        "type": "string",
+        "metadata": {
+          "displayName": "resourceGroupName",
+          "description": "resourceGroupName where the SA exists"
+        }
+      }
+    },
+    "policyRule": {
+      "if": {
+        "field": "type",
+        "equals": "Microsoft.Resources/subscriptions"
+      },
+      "then": {
+        "effect": "deployIfNotExists",
+        "details": {
+          "type": "Microsoft.Insights/logProfiles",
+          "deploymentScope": "Subscription",
+          "existenceScope": "Subscription",
+          "roleDefinitionIds": [
+            "/providers/Microsoft.Authorization/roleDefinitions/b24988ac-6180-42a0-ab88-20f7382dd24c"
+          ],
+          "existenceCondition": {
+            "field": "Microsoft.Insights/logProfiles/storageAccountId",
+            "equals": "[concat('/subscriptions/', parameters('subscriptionId'), '/resourceGroups/', parameters('resourceGroupName'), '/providers/Microsoft.Storage/storageAccounts/', parameters('storageAccountName'))]"
+          },
+          "deployment": {
+            "location": "westeurope",
+            "properties": {
+              "mode": "incremental",
+              "template": {
+                "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+                "contentVersion": "1.0.0.0",
+                "parameters": {
+                  "storageAccountName": {
+                    "type": "string"
+                  },
+                  "subscriptionId": {
+                    "type": "string"
+                  },
+                  "resourceGroupName": {
+                    "type": "string"
+                  }
+                },
+                "variables": {
+                  "storageResourceId": "[concat('/subscriptions/', parameters('subscriptionId'), '/resourceGroups/', parameters('resourceGroupName'), '/providers/Microsoft.Storage/storageAccounts/', parameters('storageAccountName'))]"
+                },
+                "resources": [
+                  {
+                    "name": "default",
+                    "type": "microsoft.insights/logprofiles",
+                    "apiVersion": "2016-03-01",
+                    "properties": {
+                      "categories": [
+                        "Write",
+                        "Delete",
+                        "Action"
+                      ],
+                      "storageAccountId": "[variables('storageResourceId')]",
+                      "locations": [
+                        "australiacentral",
+                        "australiacentral2",
+                        "australiaeast",
+                        "australiasoutheast",
+                        "brazilsouth",
+                        "canadacentral",
+                        "canadaeast",
+                        "centralindia",
+                        "centralus",
+                        "eastasia",
+                        "eastus",
+                        "eastus2",
+                        "francecentral",
+                        "francesouth",
+                        "japaneast",
+                        "japanwest",
+                        "koreacentral",
+                        "koreasouth",
+                        "northcentralus",
+                        "northeurope",
+                        "southafricanorth",
+                        "southafricawest",
+                        "southcentralus",
+                        "southindia",
+                        "southeastasia",
+                        "uaecentral",
+                        "uaenorth",
+                        "uksouth",
+                        "ukwest",
+                        "westcentralus",
+                        "westeurope",
+                        "westindia",
+                        "westus",
+                        "westus2",
+                        "global"
+                      ],
+                      "retentionPolicy": {
+                        "enabled": false,
+                        "days": 0
+                      }
+                    }
+                  }
+                ]
+              },
+              "parameters": {
+                "storageAccountName": {
+                  "value": "[parameters('storageAccountName')]"
+                },
+                "subscriptionId": {
+                  "value": "[parameters('subscriptionId')]"
+                },
+                "resourceGroupName": {
+                  "value": "[parameters('resourceGroupName')]"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "id": "/providers/Microsoft.Management/managementGroups/Production/providers/Microsoft.Authorization/policyDefinitions/dine-subscription-log-shipping-sa",
+  "type": "Microsoft.Authorization/policyDefinitions",
+  "name": "dine-subscription-log-shipping-sa",
+  "systemData": {
+    "createdBy": "e15927cc-a627-43a6-bc04-33dad53b7ca0",
+    "createdByType": "Application",
+    "createdAt": "2022-02-22T14:12:33.4753955Z",
+    "lastModifiedBy": "e15927cc-a627-43a6-bc04-33dad53b7ca0",
+    "lastModifiedByType": "Application",
+    "lastModifiedAt": "2022-06-30T12:22:14.1077388Z"
+  }
+}
