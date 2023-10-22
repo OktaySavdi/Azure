@@ -1,0 +1,136 @@
+{
+  "properties": {
+    "displayName": "dine-subscription-log-analytics",
+    "policyType": "Custom",
+    "mode": "All",
+    "metadata": {
+      "category": "ACF-Monitoring"
+    },
+    "parameters": {
+      "workspaceNamePrefix": {
+        "type": "String",
+        "metadata": {
+          "displayName": "workspaceNamePrefix",
+          "description": "Log Analytics workspace name prefix"
+        }
+      },
+      "rgName": {
+        "type": "String",
+        "metadata": {
+          "displayName": "rgName",
+          "description": "resourceGroupName where the workspace will be deployed"
+        }
+      }
+    },
+    "policyRule": {
+      "if": {
+        "field": "type",
+        "equals": "Microsoft.Resources/subscriptions"
+      },
+      "then": {
+        "effect": "deployIfNotExists",
+        "details": {
+          "type": "Microsoft.OperationalInsights/workspaces",
+          "deploymentScope": "Subscription",
+          "existenceScope": "Subscription",
+          "roleDefinitionIds": [
+            "/providers/Microsoft.Authorization/roleDefinitions/b24988ac-6180-42a0-ab88-20f7382dd24c"
+          ],
+          "existenceCondition": {
+            "allOf": [
+              {
+                "field": "name",
+                "like": "[concat(parameters('workspaceNamePrefix'), '*')]"
+              }
+            ]
+          },
+          "deployment": {
+            "location": "westeurope",
+            "properties": {
+              "mode": "incremental",
+              "template": {
+                "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+                "contentVersion": "1.0.0.0",
+                "parameters": {
+                  "workspaceNamePrefix": {
+                    "type": "String"
+                  },
+                  "rgName": {
+                    "type": "String"
+                  }
+                },
+                "resources": [
+                  {
+                    "type": "Microsoft.Resources/resourceGroups",
+                    "apiVersion": "2018-05-01",
+                    "name": "[parameters('rgName')]",
+                    "location": "[deployment().location]",
+                    "properties": {}
+                  },
+                  {
+                    "type": "Microsoft.Resources/deployments",
+                    "apiVersion": "2018-05-01",
+                    "name": "log-analytics",
+                    "resourceGroup": "[parameters('rgName')]",
+                    "dependsOn": [
+                      "[resourceId('Microsoft.Resources/resourceGroups/', parameters('rgName'))]"
+                    ],
+                    "properties": {
+                      "mode": "Incremental",
+                      "template": {
+                        "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json",
+                        "contentVersion": "1.0.0.0",
+                        "parameters": {},
+                        "variables": {},
+                        "resources": [
+                          {
+                            "name": "[concat(parameters('workspaceNamePrefix'), '-', replace(subscription().displayName, ' ', ''))]",
+                            "type": "Microsoft.OperationalInsights/workspaces",
+                            "location": "[deployment().location]",
+                            "apiVersion": "2020-03-01-preview",
+                            "properties": {
+                              "retentionInDays": 30,
+                              "sku": {
+                                "name": "pernode"
+                              },
+                              "features": {
+                                "searchVersion": 1
+                              }
+                            }
+                          },
+                          {
+                            "apiVersion": "2020-03-01-preview",
+                            "type": "Microsoft.OperationalInsights/workspaces/dataSources",
+                            "name": "[concat(parameters('workspaceNamePrefix'), '-', replace(subscription().displayName, ' ', ''), '/', replace(subscription().displayName, ' ', ''))]",
+                            "kind": "AzureActivityLog",
+                            "properties": {
+                              "LinkedResourceId": "[concat(subscription().id, '/providers/microsoft.insights/eventtypes/management')]"
+                            },
+                            "dependsOn": [
+                              "[concat(parameters('workspaceNamePrefix'), '-', replace(subscription().displayName, ' ', ''))]"
+                            ]
+                          }
+                        ]
+                      }
+                    }
+                  }
+                ]
+              },
+              "parameters": {
+                "workspaceNamePrefix": {
+                  "value": "[parameters('workspaceNamePrefix')]"
+                },
+                "rgName": {
+                  "value": "[parameters('rgName')]"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "id": "/providers/Microsoft.Management/managementGroups/Production/providers/Microsoft.Authorization/policyDefinitions/dine-subscription-log-analytics",
+  "type": "Microsoft.Authorization/policyDefinitions",
+  "name": "dine-subscription-log-analytics"
+}
