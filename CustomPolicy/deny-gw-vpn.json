@@ -1,0 +1,31 @@
+{
+  "properties": {
+    "displayName": "deny-gw-vpn",
+    "policyType": "Custom",
+    "mode": "All",
+    "metadata": {
+      "category": "ACF-Network"
+    },
+    "parameters": {},
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.Network/virtualNetworkGateways"
+          },
+          {
+            "field": "Microsoft.Network/virtualNetworkGateways/gatewayType",
+            "equals": "Vpn"
+          }
+        ]
+      },
+      "then": {
+        "effect": "Deny"
+      }
+    }
+  },
+  "id": "/providers/Microsoft.Management/managementGroups/ACFPlatform/providers/Microsoft.Authorization/policyDefinitions/deny-gw-vpn",
+  "type": "Microsoft.Authorization/policyDefinitions",
+  "name": "deny-gw-vpn"
+}
