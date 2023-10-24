@@ -1,7 +1,7 @@
 ```
 AzureActivity
 //| where TimeGenerated > ago(13days)
-| where OperationNameValue contains "MICROSOFT.NETWORK/VIRTUALNETWORKS/" 
+| where OperationNameValue contains "MICROSOFT.NETWORK/VIRTUALNETWORKS/" and OperationNameValue != "MICROSOFT.NETWORK/VIRTUALNETWORKS/TAGGEDTRAFFICCONSUMERS/VALIDATE/ACTION"
 | where ActivityStatusValue == "Success"
 | extend CentralTime = datetime_utc_to_local(TimeGenerated, 'Europe/Vienna')
 | extend EntityProperty = parse_json(tostring(Properties_d)).entity
