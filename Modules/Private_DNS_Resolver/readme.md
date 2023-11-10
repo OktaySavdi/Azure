@@ -1,4 +1,4 @@
-# Azure private Dns Resolver Module
+# Azure Private Dns Resolver Module
 
 Create Azure DNS Private Resolver with Inbound / Outbound endpoints as well as DNS Forwarding rule sets using Terraform.
 To learn more about Azure DNS Private Resolver is check out Microsoft Learn: What is Azure DNS Private Resolver?
