@@ -1,3 +1,7 @@
+# Azure Private Endpoint Module
+
+## Module Usage
+
 ```hcl
 data "azurerm_client_config" "current" {}
 
