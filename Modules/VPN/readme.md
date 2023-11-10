@@ -29,6 +29,20 @@ resource "azurerm_virtual_network" "vnet" {
   tags = var.tags
 }
 
+### Data sources ###
+data "azurerm_key_vault" "kv" {
+  provider            = azurerm.keyvault-sub
+  name                = "az-kv-vpn-hce-prod-01"
+  resource_group_name = "az-rg-vpn-hce-prod-01"
+}
+
+data "azurerm_key_vault_secret" "shared_key" {
+  provider     = azurerm.keyvault-sub
+  name         = "citrix-sharedkey"
+  key_vault_id = data.azurerm_key_vault.kv.id
+}
+
+
 module "vpn-gateway" {
   source = "git::https://mygitlab.com/modules.git//VPN"
 
@@ -66,7 +80,7 @@ module "vpn-gateway" {
       local_gw_name         = "az-lg-test-01"
       local_gateway_address = "120.12.12.12"
       local_address_space   = ["10.0.0.0.0/16", "10.10.0.0/15", "10.20.0.0/16"]
-      shared_key            = "password"
+      shared_key            = data.azurerm_key_vault_secret.shared_key.value
     },
   ]
 
@@ -140,10 +154,18 @@ provider "azurerm" {
 }
 
 provider "azurerm" {
-  subscription_id = "xxxxxxx-xxxxxxx-xxxxxxxx-xxxxxx"
-  tenant_id       = "xxxxxxx-xxxxxxx-xxxxxxxx-xxxxxx"
+  subscription_id = "<subscription_id>"
+  tenant_id       = "<tenant_id>"
   features {}
 }
+
+provider "azurerm" {
+  alias                  = "keyvault-sub"
+  subscription_id        = "<subscription_id>"
+  tenant_id              = "<tenant_id>"
+  features {}
+}
+
 ```
 ## Requirements
 
