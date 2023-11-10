@@ -1,3 +1,11 @@
+# Azure private Dns Resolver Module
+
+Create Azure DNS Private Resolver with Inbound / Outbound endpoints as well as DNS Forwarding rule sets using Terraform.
+To learn more about Azure DNS Private Resolver is check out Microsoft Learn: What is Azure DNS Private Resolver?
+This Module can be used to create Azure DNS Private Resolver, one or two Inbound and Outbound Endpoints as well as one or two DNS Forwarding rule sets due to the limitations in supporting more then two Inbound/Outbound Endpoints and two DNS forwarding rule sets per Outbound Endpoint giving us total of four DNS Forwarding rule sets available, with two outbound endpoints.
+
+## Module Usage
+
 **main.tf**
 ```hcl
 data "azurerm_virtual_network" "vnet" {
@@ -187,3 +195,4 @@ This Module can be used to create Azure DNS Private Resolver, one or two Inbound
 ## Other Resouces
 - [What is Azure DNS Private Resolver ?](https://learn.microsoft.com/en-us/azure/dns/dns-private-resolver-overview)
 - [Terraform AzureRM Provider Documentation](https://registry.terraform.io/providers/hashicorp/azurerm/latest)
+- [haflidif](https://github.com/haflidif/terraform-azurerm-dns-private-resolver)
