@@ -175,14 +175,14 @@ terraform {
 
 provider "azurerm" {
   features {}
-  subscription_id        = "<subscription_ID>"
+  subscription_id        = var.subscription 
   tenant_id              = "<tenant_ID>"
 }
 
 provider "azurerm" {
   features {}
   alias           = "subscription"
-  subscription_id = "<subscription_id>"
+  subscription_id = var.subscription 
   tenant_id       = "<tenant_ID>"
 }
 ```
