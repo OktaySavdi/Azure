@@ -27,15 +27,25 @@ resource "azurerm_storage_account" "storeacc" {
     container_delete_retention_policy {
       days = 90
     }
-  }
 
+    dynamic "cors_rule" {
+      for_each = var.cors_rule != null ? ["true"] : []
+      content {
+        allowed_origins    = var.cors_rule.allowed_origins
+        allowed_methods    = var.cors_rule.allowed_methods
+        allowed_headers    = var.cors_rule.allowed_headers
+        exposed_headers    = var.cors_rule.exposed_headers
+        max_age_in_seconds = var.cors_rule.max_age_in_seconds
+      }
+    }
+  }
 
   tags = var.tags
 }
 
 resource "azurerm_private_endpoint" "pe-st" {
   name                = var.private_endpoint_name
-  location            = var.location
+  location            = var.private_endpoint_location
   resource_group_name = var.resource_group_name
   subnet_id           = var.subnet_id
 
@@ -52,6 +62,11 @@ resource "azurerm_private_endpoint" "pe-st" {
   }
 
   tags = var.tags
+
+  depends_on = [
+    azurerm_storage_account.storeacc,
+    azurerm_storage_container.container
+  ]
 }
 
 #--------------------------------------
