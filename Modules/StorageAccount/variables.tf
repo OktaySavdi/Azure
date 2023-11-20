@@ -122,8 +122,14 @@ variable "tables" {
   default     = []
 }
 
-variable "tags" {
+ariable "tags" {
   description = "A map of tags to add to all resources"
   type        = map(string)
   default     = {}
+}
+
+variable "cors_rule" {
+  description = "CORS rules for storage account."
+  type        = object({ allowed_origins = list(string), allowed_methods = list(string), allowed_headers = list(string), exposed_headers = list(string), max_age_in_seconds = number })
+  default     = null
 }
