@@ -15,18 +15,12 @@ resource "azurerm_storage_account" "storeacc" {
   allow_nested_items_to_be_public = var.allow_nested_items_to_be_public //do not allow public blobs for example
 
   network_rules {
-    default_action = "Deny"
-    bypass         = ["AzureServices"]
+    default_action = "Deny"                             // (Required) Specifies the default action of allow or deny when no other rules match. Valid options are Deny or Allow.
+    ip_rules       = ["185.10.88.110", "65.120.110.15"] // (Optional) List of public IP or IP ranges in CIDR Format. Only IPv4 addresses are allowed. Private IP address ranges (as defined in RFC 1918) are not allowed.
+    bypass         = ["AzureServices"]                  //(Optional) Specifies whether traffic is bypassed for Logging/Metrics/AzureServices. Valid options are any combination of Logging, Metrics, AzureServices, or None
   }
 
   blob_properties {
-    delete_retention_policy {
-      days = 90
-    }
-    versioning_enabled = true
-    container_delete_retention_policy {
-      days = 90
-    }
 
     dynamic "cors_rule" {
       for_each = var.cors_rule != null ? ["true"] : []
@@ -39,10 +33,26 @@ resource "azurerm_storage_account" "storeacc" {
       }
     }
   }
-
   tags = var.tags
 }
 
+#-------------------------------
+# Storage Container Creation
+#-------------------------------
+resource "azurerm_storage_container" "container" {
+  count                 = length(var.containers_list)
+  name                  = var.containers_list[count.index].name
+  storage_account_name  = azurerm_storage_account.storeacc.name
+  container_access_type = var.containers_list[count.index].access_type
+
+  depends_on = [
+    azurerm_storage_account.storeacc
+  ]
+}
+
+#-------------------------------
+# Private Endpoint Creation
+#-------------------------------
 resource "azurerm_private_endpoint" "pe-st" {
   name                = var.private_endpoint_name
   location            = var.private_endpoint_location
@@ -75,20 +85,6 @@ resource "azurerm_private_endpoint" "pe-st" {
 resource "azurerm_advanced_threat_protection" "atp" {
   target_resource_id = azurerm_storage_account.storeacc.id
   enabled            = var.enable_advanced_threat_protection
-}
-
-#-------------------------------
-# Storage Container Creation
-#-------------------------------
-resource "azurerm_storage_container" "container" {
-  count                 = length(var.containers_list)
-  name                  = var.containers_list[count.index].name
-  storage_account_name  = azurerm_storage_account.storeacc.name
-  container_access_type = var.containers_list[count.index].access_type
-
-  depends_on = [
-    azurerm_storage_account.storeacc
-  ]
 }
 
 #-------------------------------
