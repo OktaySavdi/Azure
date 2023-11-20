@@ -1,7 +1,12 @@
 ```
 AzureActivity
 //| where TimeGenerated > ago(13days)
-| where OperationNameValue contains "MICROSOFT.NETWORK/VIRTUALNETWORKS/" and OperationNameValue != "MICROSOFT.NETWORK/VIRTUALNETWORKS/TAGGEDTRAFFICCONSUMERS/VALIDATE/ACTION"
+| where OperationNameValue contains "MICROSOFT.NETWORK/VIRTUALNETWORKS/"
+    and OperationNameValue != "MICROSOFT.NETWORK/VIRTUALNETWORKS/TAGGEDTRAFFICCONSUMERS/VALIDATE/ACTION"
+    and OperationNameValue != "MICROSOFT.NETWORK/VIRTUALNETWORKS/TAGGEDTRAFFICCONSUMERS/WRITE"
+    and OperationNameValue != "MICROSOFT.NETWORK/VIRTUALNETWORKS/SUBNETS/SERVICEASSOCIATIONLINKS/VALIDATE/ACTION"
+    and OperationNameValue != "MICROSOFT.NETWORK/VIRTUALNETWORKS/SUBNETS/SERVICEASSOCIATIONLINKS/WRITE"
+    and OperationNameValue != "MICROSOFT.NETWORK/VIRTUALNETWORKS/SUBNETS/SERVICEASSOCIATIONLINKS/DELETE"
 | where ActivityStatusValue == "Success"
 | extend CentralTime = datetime_utc_to_local(TimeGenerated, 'Europe/Vienna')
 | extend EntityProperty = parse_json(tostring(Properties_d)).entity
