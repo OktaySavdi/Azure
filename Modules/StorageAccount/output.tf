@@ -18,6 +18,22 @@ output "storage_account_primary_blob_endpoint" {
   value       = azurerm_storage_account.storeacc.primary_blob_endpoint
 }
 
+output "storage_account_private_endpoint_name" {
+  description = "The Private endpoint name"
+  value       = azurerm_private_endpoint.pe-st.name
+}
+
+output "storage_account_private_endpoint_subnet_id" {
+  description = "The Private endpoint subnet_id"
+  value       = azurerm_private_endpoint.pe-st.subnet_id
+}
+
+output "primary_access_key" {
+  description = "The Private endpoint primary_access_key"
+  value       = azurerm_storage_account.storeacc.primary_access_key
+  sensitive   = true
+}
+
 output "containers" {
   description = "Map of containers."
   value       = { for c in azurerm_storage_container.container : c.name => c.id }
