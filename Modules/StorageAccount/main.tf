@@ -16,7 +16,7 @@ resource "azurerm_storage_account" "storeacc" {
 
   network_rules {
     default_action = "Deny"                             // (Required) Specifies the default action of allow or deny when no other rules match. Valid options are Deny or Allow.
-    ip_rules       = ["185.10.88.110", "65.120.110.15"] // (Optional) List of public IP or IP ranges in CIDR Format. Only IPv4 addresses are allowed. Private IP address ranges (as defined in RFC 1918) are not allowed.
+    ip_rules       = ["65.16.34.123", "23.124.113.43"] // (Optional) List of public IP or IP ranges in CIDR Format. Only IPv4 addresses are allowed. Private IP address ranges (as defined in RFC 1918) are not allowed.
     bypass         = ["AzureServices"]                  //(Optional) Specifies whether traffic is bypassed for Logging/Metrics/AzureServices. Valid options are any combination of Logging, Metrics, AzureServices, or None
   }
 
