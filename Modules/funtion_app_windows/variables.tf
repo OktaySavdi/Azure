@@ -35,22 +35,22 @@ variable "storage_account_name" {
 }
 
 
-variable "storage_primary_access_key"{
+variable "storage_primary_access_key" {
   description = "storage account primary access key"
   default     = ""
 }
 
-variable "service_plan_name"{
+variable "service_plan_name" {
   description = "Service plan name"
   default     = ""
 }
 
-variable "sku_name"{
+variable "sku_name" {
   description = "Service plan name"
   default     = ""
 }
 
-variable "function_name"{
+variable "function_name" {
   description = "Service plan name"
   default     = ""
 }
