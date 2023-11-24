@@ -11,7 +11,13 @@ Terraform module used to create following resourses. This module will be used, w
 
 ## Module Usage
 
+**main.tf**
 ```hcl
+resource "azurerm_resource_group" "rg_name" {
+  name     = var.resource_group_name
+  location = var.location
+}
+
 # main.tf configuration
 module "vnet" {
   source  = "git::https://myrepo.lan/modules.git//VirtualNetwork?ref=v3.44.1"
@@ -33,7 +39,7 @@ module "vnet" {
   depends_on = [azurerm_resource_group.rg_name]
 }
 ```
-
+**variables.tf**
 ```hcl
 
 # variables.tf configuration
@@ -43,7 +49,7 @@ variable "default_tags" {
     DataClassification = "internal"
     Owner              = "hce"
     Platform           = "hce"
-    Environment        = "nonprod"
+    Environment        = "dev"
   }
 }
 
@@ -54,7 +60,7 @@ variable "subscription" {
 
 variable "resource_group_name" {
   description = "A container that holds related resources for an Azure solution"
-  default     = "az-rg-hce-network-nonprod-01"
+  default     = "az-rg-hce-dnsresolver-network-dev-01"
 }
 
 variable "location" {
@@ -64,7 +70,7 @@ variable "location" {
 
 variable "vnet_name" {
   description = "Name of Azure Virtual Network"
-  default     = "az-vnet-hce-network-nonprod-01"
+  default     = "az-vnet-hce-dnsresolver-network-dev-01"
 }
 
 variable "vnet_address_space" {
@@ -79,20 +85,20 @@ variable "dns_servers" {
 
 variable "disk_access_name" {
   description = "disk access name"
-  default     = "az-da-it-nonprod-01"
+  default     = "az-da-hce-dnsresolver-dev-01"
 }
 
 variable "route_tables" {
   description = "For each route table, create an object that contain fields"
   default = {
-    azweu-rt_snet_default_dev_01 = {
-      rt_name = "az-rt-snet-myapp-dev-01"
+    az-rt_hce-dnsresolver_dev_01 = {
+      rt_name = "az-rt-hce-dnsresolver-dev-01"
       routes = [
         { name = "default", address_prefix = "0.0.0.0/0", next_hop_type = "VirtualAppliance", next_hop_in_ip_address = "10.10.10.10" }
       ]
     },
-    azweu_rt_apg_default_nonprod_01 = {
-      rt_name = "az-rt-apg-myap-nonprod-01"
+    az_rt_apg_dnsresolver_dev_01 = {
+      rt_name = "az-rt-hce-apg-dnsresolver-dev-01"
       routes = [
         { name = "default", address_prefix = "0.0.0.0/0", next_hop_type = "Internet" }
       ]
@@ -104,52 +110,52 @@ variable "subnets" {
   description = "For each subnet, create an object that contain fields"
   default = {
   hce_vm_subnet = {
-      subnet_name            = "az-snet-hce-vm-nonprod-01"
+      subnet_name            = "az-snet-hce-dnsresolver-dev-01"
       subnet_address_prefix  = ["10.10.10.0/26"]
-      nsg_name               = "az-nsg-snet-hce-vm-nonprod-01"
+      nsg_name               = "az-nsg-hce-dnsresolver-dev-01"
       service_endpoints      = ["Microsoft.Storage"]
-      rt_name                = "az-rt-snet-myapp-dev-01"
+      rt_name                = "az-rt-hce-dnsresolver-dev-01"
       delegations            = []
       private_endpoint_network_policies_enabled = false
-      private_endpoint_name  = "az-pe-myapp-vm-nonprod-01"
+      private_endpoint_name  = "az-pe-hce-dnsresolver-dev-01"
       tags = {
         DataClassification = "internal"
         Owner              = "hce"
         Platform           = "hce"
-        Environment        = "nonprod"
+        Environment        = "dev"
       }
     },
   hce_management_subnet = {
-      subnet_name            = "az-snet-hce-management-nonprod-01"
+      subnet_name            = "az-snet-hce-management-dev-01"
       subnet_address_prefix  = ["10.10.10.64/27"]
-      nsg_name               = "az-nsg-snet-hce-nonprod-01"
+      nsg_name               = "az-nsg-hce-management-dev-011"
       service_endpoints      = ["Microsoft.Storage","Microsoft.Sql"]
-      rt_name                = "azweu-rt-snet-myapp-dev-01"
+      rt_name                = "az-rt-hce-dnsresolver-dev-01"
       delegations            = []
       private_endpoint_network_policies_enabled = false
-      private_endpoint_name  = "azweu-pe-myapp-management-nonprod-01"
+      private_endpoint_name  = "az-pe-hce-management-dev-01"
 
       tags = {
         DataClassification = "internal"
         Owner              = "hce"
         Platform           = "hce"
-        Environment        = "nonprod"
+        Environment        = "dev"
       }
     },
   hce_dmz_subnet = {
-      subnet_name            = "az-snet-hce-dmz-nonprod-01"
+      subnet_name            = "az-snet-hce-dmz-dev-01"
       subnet_address_prefix  = ["10.10.10.96/28"]
-      nsg_name               = "az-nsg-snet-hce-dmz-nonprod-01"
+      nsg_name               = "az-nsg-hce-dmz-dev-01"
       service_endpoints      = ["Microsoft.Storage"]
-      rt_name                = "azweu-rt-apg-default-nonprod-01"
+      rt_name                = "az-rt-hce-apg-dnsresolver-dev-01"
       delegations            = [{ name = "Microsoft.Web/serverFarms", actions = ["Microsoft.Network/virtualNetworks/subnets/action"] }]
       private_endpoint_network_policies_enabled = false
-      private_endpoint_name  = "azweu-pe-euc-dmz-nonprod-01"
+      private_endpoint_name  = "az-pe-hce-dmz-dev-01"
       tags = {
         DataClassification = "internal"
         Owner              = "hce"
         Platform           = "hce"
-        Environment        = "nonprod"
+        Environment        = "dev"
       }
     }
   }
