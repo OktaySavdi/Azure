@@ -59,15 +59,31 @@ resource "azurerm_private_dns_resolver_dns_forwarding_ruleset" "forwarding_rules
   tags                                       = var.tags
 }
 
+#resource "azurerm_private_dns_resolver_forwarding_rule" "forwarding_rule" {
+#  for_each                  = var.forwarding_rules
+#  name                      = each.value.name
+#  dns_forwarding_ruleset_id = azurerm_private_dns_resolver_dns_forwarding_ruleset.forwarding_ruleset["${each.value.forwarding_ruleset_name}"].id
+#  domain_name               = each.value.domain_name
+#  enabled                   = each.value.enabled
+#
+#  dynamic "target_dns_servers" {
+#    for_each = each.value.target_dns_servers
+#    content {
+#      ip_address = target_dns_servers.value.ip_address
+#      port       = target_dns_servers.value.port
+#    }
+#  }
+#}
+
 resource "azurerm_private_dns_resolver_forwarding_rule" "forwarding_rule" {
-  for_each                  = var.forwarding_rules
-  name                      = each.value.name
-  dns_forwarding_ruleset_id = azurerm_private_dns_resolver_dns_forwarding_ruleset.forwarding_ruleset["${each.value.forwarding_ruleset_name}"].id
-  domain_name               = each.value.domain_name
-  enabled                   = each.value.enabled
+  count                     = length(var.forwarding_rules)
+  name                      = var.forwarding_rules[count.index].name
+  dns_forwarding_ruleset_id = azurerm_private_dns_resolver_dns_forwarding_ruleset.forwarding_ruleset["${var.forwarding_rules[count.index].forwarding_ruleset_name}"].id
+  domain_name               = var.forwarding_rules[count.index].domain_name
+  enabled                   = var.forwarding_rules[count.index].enabled
 
   dynamic "target_dns_servers" {
-    for_each = each.value.target_dns_servers
+    for_each = var.forwarding_rules[count.index].target_dns_servers
     content {
       ip_address = target_dns_servers.value.ip_address
       port       = target_dns_servers.value.port
