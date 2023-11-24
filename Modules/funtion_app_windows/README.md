@@ -7,6 +7,7 @@ Terraform module used to create following resourses.
 
 ## Module Usage
 
+**main.tf**
 ```hcl
 # main.tf configuration
 module "function_app" {
@@ -23,18 +24,13 @@ module "function_app" {
   site_config                     = var.site_config
   tags                            = var.default_tags
 }
-
 ```
-
+**variables.tf**
 ```hcl
-
-# variables.tf configuration
 variable "default_tags" {
   type = map(any)
   default = {
-    CostCenter  		    = "WX111"
-    DataClassification  = "restricted"
-    Owner         		  = "it-hce"
+    Owner         		  = "hce"
     Platform      		  = "HCE"
     Environment   		  = "prod"
   }
