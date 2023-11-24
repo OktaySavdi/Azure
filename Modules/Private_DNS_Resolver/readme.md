@@ -39,6 +39,10 @@ variable "tags" {
   }
 }
 
+variable "forwarding_rules" {
+  default = []
+}
+
 variable "resource_group_name_for_vnet" {
   description = "A container that holds related resources for an Azure solution"
   default     = "az-rg-hce-test-01"
@@ -94,46 +98,45 @@ variable "dns_resolver_outbound_endpoints" {
     }
   ]
 }
+```
+**terraform.tfvars**
+```hcl
+forwarding_rules = [
+  {
+    name                   = "mydomain.lan"
+    domain_name            = "mydomain.lan."
+    enabled                = true
+    forwarding_ruleset_name = "ruleset-westeu1"
 
-variable "forwarding_rules" {
-  description = "For each subnet, create an object that contain fields"
-  default = {
-    corp_mycompany_com = {
-      name        = "MYDOMAIN1"
-      domain_name = "corp.mycompany.com." # Domain name supports 2-34 labels and must end with a dot (period) for example corp.mycompany.com. has three labels.
-      enabled     = true
-      forwarding_ruleset_name = "ruleset-westeu1"
+    target_dns_servers = [
+      {
+        ip_address = "10.10.10.10"
+        port       = 53
+      },
+      {
+        ip_address = "10.10.10.11"
+        port       = 53
+      }
+    ]
+  }, 
+  {
+    name                   = "corp.mycompany2.com"
+    domain_name            = "corp.mycompany2.com."
+    enabled                = true
+    forwarding_ruleset_name = "ruleset-westeu2"
 
-      target_dns_servers = [
-        {
-          ip_address = "10.0.0.3"
-          port       = 53
-        },
-        {
-          ip_address = "10.0.0.4"
-          port       = 53
-        }
-      ]
-    },
-    local_mycompany_com = {
-      name        = "MYDOMAIN2"
-      domain_name = "corp.mycompany2.com."
-      enabled     = true
-      forwarding_ruleset_name = "ruleset-westeu1"
-
-      target_dns_servers = [
-        {
-          ip_address = "10.0.1.3"
-          port       = 53
-        },
-        {
-          ip_address = "10.0.1.4"
-          port       = 53
-        }
-      ]
-    }
+    target_dns_servers = [
+      {
+        ip_address = "10.10.10.10"
+        port       = 53
+      },
+      {
+        ip_address = "10.10.10.11"
+        port       = 53
+      }
+    ]
   }
-}
+]
 ```
 **providers.tf**
 ```hcl
