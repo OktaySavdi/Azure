@@ -92,7 +92,7 @@ resource "azurerm_subnet_route_table_association" "snet_rt_assoc" {
   subnet_id      = azurerm_subnet.snet[each.key].id
   route_table_id = "${data.azurerm_resource_group.rg.id}/providers/Microsoft.Network/routeTables/${each.value.rt_name}"
 
-  depends_on = [ azurerm_route_table.route_tables ]
+  depends_on = [azurerm_route_table.route_tables]
 }
 
 #-----------------------------------------------
@@ -103,26 +103,26 @@ resource "azurerm_disk_access" "disk_access" {
   resource_group_name = var.resource_group_name
   location            = var.location
 
-  tags                = var.tags
+  tags = var.tags
 }
 
 #-----------------------------------------------
 # private endpoint for each subnet
 #-----------------------------------------------
 resource "azurerm_private_endpoint" "private_endpoint" {
-  for_each            = var.subnets
+   for_each           = { for subnet, config in var.subnets : subnet => config if config.private_endpoint_name != "" }
   name                = each.value.private_endpoint_name
   location            = var.location
   resource_group_name = var.resource_group_name
   subnet_id           = azurerm_subnet.snet[each.key].id
 
   private_service_connection {
-    name                            = "${each.value.private_endpoint_name}-connection"
-    private_connection_resource_id  = azurerm_disk_access.disk_access.id
-    is_manual_connection            = false
-    subresource_names               = ["disks"]
+    name                           = "${each.value.private_endpoint_name}-connection"
+    private_connection_resource_id = azurerm_disk_access.disk_access.id
+    is_manual_connection           = false
+    subresource_names              = ["disks"]
   }
 
-  tags                = each.value.tags
-  depends_on = [ azurerm_disk_access.disk_access ]
+  tags       = each.value.tags
+  depends_on = [azurerm_disk_access.disk_access]
 }
