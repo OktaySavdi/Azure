@@ -7,6 +7,8 @@ AzureActivity
     and OperationNameValue != "MICROSOFT.NETWORK/VIRTUALNETWORKS/SUBNETS/SERVICEASSOCIATIONLINKS/VALIDATE/ACTION"
     and OperationNameValue != "MICROSOFT.NETWORK/VIRTUALNETWORKS/SUBNETS/SERVICEASSOCIATIONLINKS/WRITE"
     and OperationNameValue != "MICROSOFT.NETWORK/VIRTUALNETWORKS/SUBNETS/SERVICEASSOCIATIONLINKS/DELETE"
+    and OperationNameValue != "MICROSOFT.NETWORK/VIRTUALNETWORKS/REMOTEVIRTUALNETWORKPEERINGPROXIES/WRITE"
+    and OperationNameValue != "MICROSOFT.NETWORK/VIRTUALNETWORKS/VIRTUALNETWORKPEERINGS/WRITE"
 | where ActivityStatusValue == "Success"
 | extend CentralTime = datetime_utc_to_local(TimeGenerated, 'Europe/Vienna')
 | extend EntityProperty = parse_json(tostring(Properties_d)).entity
