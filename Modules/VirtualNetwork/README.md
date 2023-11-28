@@ -131,7 +131,7 @@ variable "subnets" {
       nsg_name               = "az-nsg-hce-management-dev-011"
       service_endpoints      = ["Microsoft.Storage","Microsoft.Sql"]
       rt_name                = "az-rt-hce-dnsresolver-dev-01"
-      delegations            = []
+      delegations            = [ { delegationname = "Microsoft.Web.serverFarms", name = "Microsoft.Web/serverFarms", actions = ["Microsoft.Network/virtualNetworks/subnets/action"] }]
       private_endpoint_network_policies_enabled = false
       private_endpoint_name  = "az-pe-hce-management-dev-01"
 
@@ -148,7 +148,7 @@ variable "subnets" {
       nsg_name               = "az-nsg-hce-dmz-dev-01"
       service_endpoints      = ["Microsoft.Storage"]
       rt_name                = "az-rt-hce-apg-dnsresolver-dev-01"
-      delegations            = [{ name = "Microsoft.Web/serverFarms", actions = ["Microsoft.Network/virtualNetworks/subnets/action"] }]
+      delegations            = [ { delegationname = "Microsoft.Web.serverFarms", name = "Microsoft.Web/serverFarms", actions = ["Microsoft.Network/virtualNetworks/subnets/action"] }]
       private_endpoint_network_policies_enabled = false
       private_endpoint_name  = "az-pe-hce-dmz-dev-01"
       tags = {
