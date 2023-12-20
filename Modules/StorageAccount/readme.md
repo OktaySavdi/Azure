@@ -95,7 +95,7 @@ variable "virtual_network_resource_group_name" {
 variable "shared_private_dns_zone_resource_group_name" {
   type        = string
   description = "Shared private dns zone resource group name"
-  default     = "az-rg-dnsPrivateZone-prod"
+  default     = "az-rg-dnsPrivateZone-test-01"
 }
 
 variable "private_endpoint_location" {
