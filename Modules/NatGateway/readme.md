@@ -17,7 +17,7 @@ Note: Please make sure to update the provider file with the proper vaules (subsc
 
 # main.tf configuration
 module "vnet" {
-  source  = "git::https://ato-hce-git1.gtoffice.lan/hce-public/modules.git//NatGateway?ref=v3.44.1"
+  source  = "git::https://<git_address>/public/modules.git//NatGateway?ref=v3.44.1"
   providers = {
     azurerm = azurerm.subscription
   }
