@@ -5,41 +5,18 @@ Terraform module for creating harbor projects.
 ## Module Usage
 
 ```hcl
-# Azurerm provider configuration
-provider "azurerm" {
-  features {}
-}
-
 module "harbor-project" {
-  source                = "git::https://<git_address>/hce-public/modules.git//HarborProject"
+  source                = "git::https://<git_address>/hce-public/modules.git//HarborProject?ref=v3.44.1"
   key_vault_secret_name = var.key_vault_secret_name
 
-  define_group = {
-    group1 = {
-      group_name    = var.define_group.group_name
-      role          = var.define_group.role
-      ldap_group_dn = var.define_group.ldap_group_dn
-    }
-  }
+  harbor_project_name    = var.harbor_project_name
+  define_group           = var.define_group
+  image_retention_policy = var.image_retention_policy
 
-  harbor_project_name = {
-    "name"                   = var.harbor_project_name.name
-    "public"                 = var.harbor_project_name.public
-    "vulnerability_scanning" = var.harbor_project_name.vulnerability_scanning
-  }
-
-  image_retention_policy = {
-    "disabled"               = var.image_retention_policy.disabled
-    "schedule"               = var.image_retention_policy.schedule
-    "n_days_since_last_pull" = var.image_retention_policy.n_days_since_last_pull
-    "n_days_since_last_push" = var.image_retention_policy.n_days_since_last_push
-    "tag_matching"           = var.image_retention_policy.tag_matching
-  }
-
-  storage_quota            = var.storage_quota
-  key_vault_name           = "azgwc-kv-gtit-hce-prod"
-  resource_group_name      = "azgwc-rg-gtit-hce-prod-01"
-  harbor_project_url       = var.harbor_project_url
+  storage_quota       = var.storage_quota
+  key_vault_name      = "azgwc-kv-gtit-hce-prod"
+  resource_group_name = "azgwc-rg-gtit-hce-prod-01"
+  harbor_project_url  = var.harbor_project_url
 }
 ```
 variables
@@ -62,35 +39,115 @@ variable harbor_project_url {
   default       = "https://stg-harbor1.domain.com"
 }
 
-variable "define_group" {
-  type = map(string)
+variable "harbor_project_name" {
   default = {
-    "group_name"            = "<my group name>"        # (Required) The of the project that will be created in harbor (must be lowercase).
-    "role"                  = "projectadmin"           # (Required) The premissions that the entity will be granted.
-    "ldap_group_dn"         = "CN=<my_CN>,OU=RoleGroups,OU=<my_OU>,DC=<my_DC>,DC=<my_DC>" # The distinguished name of the group within AD/LDAP
+    name                   = "test" # (Required) The of the project that will be created in harbor (must be lowercase).
+    public                 = false  # (Optional) The project will be public accessibility. Can be set to "true" or "false"
+    vulnerability_scanning = false  # (Optional) Images will be scanned for vulnerabilities when push to harbor. Can be set to "true" or "false"
+    enable_content_trust   = false  # (Optional) Enables Content Trust for project. When enabled it queries the embedded docker notary server. Can be set to "true" or "false" (Default:
   }
 }
 
-variable "harbor_project_name" {
-  type = map(string)
-  default = {
-    "name"                   = "<repo name>"     # (Required) The of the project that will be created in harbor (must be lowercase).
-    "public"                 = true              # (Optional) The project will be public accessibility. Can be set to "true" or "false"
-    "vulnerability_scanning" = true              # (Optional) Images will be scanned for vulnerabilities when push to harbor. Can be set to "true" or "false"
-  }
+variable "define_group" {
+  type = list(object({
+    group_name    = string   
+    role          = string
+    ldap_group_dn = string
+    type          = string
+  }))
+
+  default = [
+    {
+      group_name    = "<my group name>"                                           # (Required) The of the project that will be created in harbor (must be lowercase).
+      type          = "ldap"                                                      # (Required) The group type. Can be set to "ldap", "internal" or "oidc"
+      role          = "developer"                                                 # (Required) The premissions that the entity will be granted.
+      ldap_group_dn = "CN=<my_CN>,OU=RoleGroups,OU=<my_OU>,DC=<my_DC>,DC=<my_DC>" # The distinguished name of the group within AD/LDAP
+    },
+    {
+      group_name    = "<my group name>"
+      type          = "ldap"
+      role          = "projectadmin"
+      ldap_group_dn = "CN=<my_CN>,OU=RoleGroups,OU=<my_OU>,DC=<my_DC>,DC=<my_DC>"
+    }
+  ]
 }
 
 variable "image_retention_policy" {
-  type = map(string)
-  default = {
-    "disabled"                  = false     # (Optional) Specify if the rule is disable or not. Defaults to false
-    "schedule"                  = "weekly"  # (Optional) The schedule of when you would like the policy to run. This can be daily, weekly, monthly or can be a custom cron string.
-    "n_days_since_last_pull"    = 60        # (Optional) retains the artifacts pulled within the lasts n days.  
-    "n_days_since_last_push"    = 60        # (Optional) retains the artifacts pushed within the lasts n days.
-    "tag_matching"              = ""        # (Optional) For the tag excuding.
-  }
+  default = [
+    {
+      disabled               = true    # (Optional) Specify if the rule is disable or not. Defaults to false
+      schedule               = "Daily" # (Optional) The schedule of when you would like the policy to run. This can be Daily, Weekly, Monthly or can be a custom cron string.
+      n_days_since_last_pull = 3       # (Optional) retains the artifacts pulled within the lasts n days.
+      tag_matching           = "*"     # (Optional) For the tag excuding.
+      always_retain          = false   # (Optional) retain always.
+      repo_matching          = ""      # (Optional) For the repositories matching.
+      repo_excluding         = ""      # (Optional) For the repositories excuding.
+      tag_excluding          = ""      # (Optional) For the tag excuding.
+      untagged_artifacts     = "false" # (Optional) with untagged artifacts. Defaults to true
+    }
+  ]
 }
 ```
+providers.tf
+```hcl
+terraform {
+  required_providers {
+    azurerm = {
+      source  = "hashicorp/azurerm"
+      version = "3.44.1"
+    }
+  }
+ #  backend "azurerm" {
+ #    resource_group_name  = "<your rg>" #change
+ #    storage_account_name = "<your sa>" #change
+ #    container_name       = "<your cn>" #change
+ #    key                  = "/<your directoy>" #change
+ #    subscription_id      = "<your storage account subscription>" #change
+ #  }
+}
+
+provider "azurerm" {
+  features {}
+}
+
+provider "azurerm" {
+  alias           = "keyvault-sub"
+  subscription_id = "<subscription_ID>"
+  tenant_id       = "<tenant_ID>"
+  features {}
+}
+
+provider "azurerm" {
+  alias           = "private-dns"
+  subscription_id = "<subscription_ID>"
+  tenant_id       = "<tenant_ID>"
+  features {}
+}
+```
+## Resources
+
+| Name | Type |
+|------|------|
+| [harbor_project.harborproject](https://registry.terraform.io/providers/BESTSELLER/harbor/3.7.1/docs/resources/project) | resource |
+| [harbor_project_member_group.harborprojectmembergroup](https://registry.terraform.io/providers/BESTSELLER/harbor/3.7.1/docs/resources/project_member_group) | resource |
+| [harbor_retention_policy.main](https://registry.terraform.io/providers/BESTSELLER/harbor/3.7.1/docs/resources/retention_policy) | resource |
+| [azurerm_key_vault.kv](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/data-sources/key_vault) | data source |
+| [azurerm_key_vault_secret.harbor_token](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/data-sources/key_vault_secret) | data source |
+
+## Inputs
+
+| Name | Description | Type | Default | Required |
+|------|-------------|------|---------|:--------:|
+| <a name="input_define_group"></a> [define\_group](#input\_define\_group) | n/a | <pre>list(object({<br>    group_name    = string<br>    role          = string<br>    ldap_group_dn = string<br>    type          = string<br>  }))</pre> | n/a | yes |
+| <a name="input_harbor_project_name"></a> [harbor\_project\_name](#input\_harbor\_project\_name) | For each project, create an object that contain fields | `map` | `{}` | no |
+| <a name="input_harbor_project_url"></a> [harbor\_project\_url](#input\_harbor\_project\_url) | URL of harbor project | `string` | n/a | yes |
+| <a name="input_image_retention_policy"></a> [image\_retention\_policy](#input\_image\_retention\_policy) | n/a | <pre>list(object({<br>    enabled                = bool<br>    schedule               = string<br>    disabled               = bool<br>    n_days_since_last_pull = number<br>    tag_matching           = string<br>    always_retain          = bool<br>    repo_matching          = string<br>    repo_excluding         = string<br>    tag_excluding          = string<br>    untagged_artifacts     = bool<br>  }))</pre> | `[]` | no |
+| <a name="input_key_vault_name"></a> [key\_vault\_name](#input\_key\_vault\_name) | name of key vault resource | `string` | n/a | yes |
+| <a name="input_key_vault_secret_name"></a> [key\_vault\_secret\_name](#input\_key\_vault\_secret\_name) | azure prod env name of vault | `string` | n/a | yes |
+| <a name="input_resource_group_name"></a> [resource\_group\_name](#input\_resource\_group\_name) | resource group name of key vault | `string` | n/a | yes |
+| <a name="input_storage_quota"></a> [storage\_quota](#input\_storage\_quota) | harbor registry repo size information example: 5 | `string` | n/a | yes |
+
+
 
 ## Requirements
 
