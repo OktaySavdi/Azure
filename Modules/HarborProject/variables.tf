@@ -10,23 +10,13 @@ variable "key_vault_secret_name" {
   }
 }
 
-variable "define_group" {
-  type        = map(any)
-  description = "azure prod env name of vault"
-}
-
-variable "harbor_project_name" {
-  type        = map(string)
-  description = "name of harbor project"
-}
-
 variable "storage_quota" {
   type        = string
   description = "harbor registry repo size information example: 5"
 
   validation {
-    condition     = var.storage_quota < 20
-    error_message = "`storage_quota` must be less than 20 GB"
+    condition     = var.storage_quota < 200
+    error_message = "`storage_quota` must be less than 200 GB"
   }
 }
 
@@ -46,6 +36,30 @@ variable "harbor_project_url" {
 }
 
 variable "image_retention_policy" {
-  type        = map(string)
-  description = "information about retantion policy"
+  type = list(object({
+    schedule               = string
+    disabled               = bool
+    n_days_since_last_pull = number
+    tag_matching           = string
+    always_retain          = bool
+    repo_matching          = string
+    repo_excluding         = string
+    tag_excluding          = string
+    untagged_artifacts     = bool
+  }))
+  default = []
+}
+
+variable "define_group" {
+  type = list(object({
+    group_name    = string
+    role          = string
+    ldap_group_dn = string
+    type          = string
+  }))
+}
+
+variable "harbor_project_name" {
+  description = "For each project, create an object that contain fields"
+  default     = {}
 }
