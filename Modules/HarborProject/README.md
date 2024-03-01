@@ -72,19 +72,36 @@ variable "define_group" {
   ]
 }
 
-variable "image_retention_policy" {
+variable "image_retention_policy" { #Description of policies https://registry.terraform.io/providers/goharbor/harbor/latest/docs/resources/retention_policy
   default = [
     {
-      disabled               = true    # (Optional) Specify if the rule is disable or not. Defaults to false
-      schedule               = "Daily" # (Optional) The schedule of when you would like the policy to run. This can be Daily, Weekly, Monthly or can be a custom cron string.
-      n_days_since_last_pull = 3       # (Optional) retains the artifacts pulled within the lasts n days.
-      tag_matching           = "*"     # (Optional) For the tag excuding.
-      always_retain          = false   # (Optional) retain always.
-      repo_matching          = ""      # (Optional) For the repositories matching.
-      repo_excluding         = ""      # (Optional) For the repositories excuding.
-      tag_excluding          = ""      # (Optional) For the tag excuding.
-      untagged_artifacts     = "false" # (Optional) with untagged artifacts. Defaults to true
-    }
+      n_days_since_last_pull = 5
+      repo_matching          = "**"
+      tag_matching           = "latest"
+      schedule               = "Daily"
+      disabled               = false
+      always_retain          = false
+      repo_excluding         = null
+      tag_excluding          = null
+      untagged_artifacts     = false
+      n_days_since_last_push = null
+      most_recently_pulled   = null
+      most_recently_pushed   = null
+    },
+	  {
+	    n_days_since_last_push = 10
+      repo_matching          = "**"
+      tag_matching           = "{latest,snapshot}"
+      schedule               = "Daily"
+      disabled               = false
+      always_retain          = false
+      repo_excluding         = null
+      tag_excluding          = null
+      untagged_artifacts     = false
+      n_days_since_last_pull = null
+      most_recently_pulled   = null
+      most_recently_pushed   = null
+	  }
   ]
 }
 ```
@@ -107,20 +124,6 @@ terraform {
 }
 
 provider "azurerm" {
-  features {}
-}
-
-provider "azurerm" {
-  alias           = "keyvault-sub"
-  subscription_id = "<subscription_ID>"
-  tenant_id       = "<tenant_ID>"
-  features {}
-}
-
-provider "azurerm" {
-  alias           = "private-dns"
-  subscription_id = "<subscription_ID>"
-  tenant_id       = "<tenant_ID>"
   features {}
 }
 ```
