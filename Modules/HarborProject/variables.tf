@@ -39,13 +39,16 @@ variable "image_retention_policy" {
   type = list(object({
     schedule               = string
     disabled               = bool
-    n_days_since_last_pull = number
     tag_matching           = string
     always_retain          = bool
     repo_matching          = string
     repo_excluding         = string
     tag_excluding          = string
     untagged_artifacts     = bool
+    n_days_since_last_pull = number
+    n_days_since_last_push = number
+    most_recently_pulled   = number
+    most_recently_pushed   = number
   }))
   default = []
 }
