@@ -1,4 +1,4 @@
-# terraform-azurerm-aks
+# Terraform Azure AKS Module
 
 This Terraform module deploys a Kubernetes cluster on Azure using AKS (Azure Kubernetes Service)
 
