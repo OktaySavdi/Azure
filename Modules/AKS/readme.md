@@ -149,11 +149,10 @@ variable "node_pools" {
       enable_host_encryption   = false
       vnet_subnet_id           = "/subscriptions/<subscription_ID>/resourceGroups/<resorcegroup_name>/providers/Microsoft.Network/virtualNetworks/<vnet_name>/subnets/<subnet_name>"
       tags = {
-        "CostCenter"         = "STRI5004"
         "DataClassification" = "internal"
-        "Owner"              = "hce"
-        "Platform"           = "shared-it"
-        "Environment"        = "nonprod"
+        "Owner"              = "<team_Name>"
+        "Platform"           = "<platform_name>"
+         "Environment"        = "nonprod"
       }
     },
     #node2 = {
@@ -172,12 +171,11 @@ variable "node_pools" {
     #  max_pods                 = 250
     #  vnet_subnet_id           = "/subscriptions/<subscription_ID>/resourceGroups/<resorcegroup_name>/providers/Microsoft.Network/virtualNetworks/<vnet_name>/subnets/<subnet_name>"
     #  tags = {
-    #    "CostCenter"         = "STRI5004"
-    #    "DataClassification" = "internal"
-    #    "Owner"              = "hce"
-    #    "Platform"           = "shared-it"
+    #   "DataClassification" = "internal"
+    #   "Owner"              = "<team_Name>"
+    #   "Platform"           = "<platform_name>"
     #    "Environment"        = "nonprod"
-    #  }
+    # }
     #}
   }
 }
