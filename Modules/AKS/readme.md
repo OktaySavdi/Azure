@@ -205,7 +205,7 @@ data "azurerm_private_dns_zone" "full_zone" {
 // Deploys a Kubernetes cluster on AKS with monitoring support through Azure Log Analytics
 module "aks" {
   // provider                      = azurerm.prod-sub
-  source = "git::https://ato-hce-git1.gtoffice.lan/hce-public/modules.git//AKS?ref=v3.97.1"
+  source = "git::https://mygitaddress.com/modules.git//AKS?ref=v3.97.1"
   providers = {
     azurerm = azurerm.subscription
   }
