@@ -13,6 +13,11 @@ variable "vnet_name" {
   default     = ""
 }
 
+variable "nsgs" {
+  description = "For each nsg, create an object that contain fields"
+  default     = {}
+}
+
 variable "rt_name" {
   description = "Name of Route Table"
   default     = ""
