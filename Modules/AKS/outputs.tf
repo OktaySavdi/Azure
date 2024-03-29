@@ -130,11 +130,6 @@ output "host" {
   value       = azurerm_kubernetes_cluster.main.kube_config[0].host
 }
 
-output "http_application_routing_enabled" {
-  description = "The `azurerm_kubernetes_cluster`'s `http_application_routing_enabled` argument. (Optional) Should HTTP Application Routing be enabled?"
-  value       = azurerm_kubernetes_cluster.main.http_application_routing_enabled
-}
-
 output "http_application_routing_zone_name" {
   description = "The `azurerm_kubernetes_cluster`'s `http_application_routing_zone_name` argument. The Zone Name of the HTTP Application Routing."
   value       = azurerm_kubernetes_cluster.main.http_application_routing_zone_name != null ? azurerm_kubernetes_cluster.main.http_application_routing_zone_name : ""
@@ -182,6 +177,11 @@ output "location" {
   value       = azurerm_kubernetes_cluster.main.location
 }
 
+output "network_profile" {
+  description = "The `azurerm_kubernetes_cluster`'s `network_profile` block"
+  value       = azurerm_kubernetes_cluster.main.network_profile
+}
+
 output "node_resource_group" {
   description = "The auto-generated Resource Group which contains the resources for this Managed Kubernetes Cluster."
   value       = azurerm_kubernetes_cluster.main.node_resource_group
@@ -217,4 +217,9 @@ output "username" {
   description = "The `username` in the `azurerm_kubernetes_cluster`'s `kube_config` block. A username used to authenticate to the Kubernetes cluster."
   sensitive   = true
   value       = azurerm_kubernetes_cluster.main.kube_config[0].username
+}
+
+output "web_app_routing_identity" {
+  description = "The `azurerm_kubernetes_cluster`'s `web_app_routing_identity` block, it's type is a list of object."
+  value       = try(azurerm_kubernetes_cluster.main.web_app_routing[0].web_app_routing_identity, [])
 }
