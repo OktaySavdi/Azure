@@ -66,8 +66,8 @@ resource "azurerm_subnet" "snet" {
 # Network security group
 #-----------------------------------------------
 resource "azurerm_network_security_group" "nsg" {
-  for_each            = var.subnets
-  name                = each.value.nsg_name
+  for_each            = var.nsgs
+  name                = each.value.name
   resource_group_name = var.resource_group_name
   location            = var.location
   tags                = each.value.tags
@@ -78,9 +78,11 @@ resource "azurerm_network_security_group" "nsg" {
 #-----------------------------------------------
 
 resource "azurerm_subnet_network_security_group_association" "nsg-assoc" {
-  for_each                  = var.subnets
+  for_each                  = { for subnet, config in var.subnets : subnet => config if config.nsg_name != "" }
   subnet_id                 = azurerm_subnet.snet[each.key].id
-  network_security_group_id = azurerm_network_security_group.nsg[each.key].id
+  network_security_group_id = "${data.azurerm_resource_group.rg.id}/providers/Microsoft.Network/networkSecurityGroups/${each.value.nsg_name}"
+
+   depends_on = [azurerm_network_security_group.nsg]
 }
 
 #-----------------------------------------------
@@ -110,7 +112,7 @@ resource "azurerm_disk_access" "disk_access" {
 # private endpoint for each subnet
 #-----------------------------------------------
 resource "azurerm_private_endpoint" "private_endpoint" {
-   for_each           = { for subnet, config in var.subnets : subnet => config if config.private_endpoint_name != "" }
+  for_each            = { for subnet, config in var.subnets : subnet => config if config.private_endpoint_name != "" }
   name                = each.value.private_endpoint_name
   location            = var.location
   resource_group_name = var.resource_group_name
