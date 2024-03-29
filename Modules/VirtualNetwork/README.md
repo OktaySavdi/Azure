@@ -11,7 +11,6 @@ Terraform module used to create following resourses. This module will be used, w
 
 ## Module Usage
 
-**main.tf**
 ```hcl
 resource "azurerm_resource_group" "rg_name" {
   name     = var.resource_group_name
@@ -20,7 +19,7 @@ resource "azurerm_resource_group" "rg_name" {
 
 # main.tf configuration
 module "vnet" {
-  source  = "git::https://myrepo.lan/modules.git//VirtualNetwork?ref=v3.44.1"
+  source  = "git::https://myrepo.lan/modules.git//VirtualNetwork?ref=v3.97.1"
   providers = {
     azurerm = azurerm.subscription
   }
@@ -39,7 +38,7 @@ module "vnet" {
   depends_on = [azurerm_resource_group.rg_name]
 }
 ```
-**variables.tf**
+
 ```hcl
 
 # variables.tf configuration
@@ -60,7 +59,7 @@ variable "subscription" {
 
 variable "resource_group_name" {
   description = "A container that holds related resources for an Azure solution"
-  default     = "az-rg-hce-dnsresolver-network-dev-01"
+  default     = "az-rg-it-dnsresolver-network-nonprod-01"
 }
 
 variable "location" {
@@ -70,7 +69,12 @@ variable "location" {
 
 variable "vnet_name" {
   description = "Name of Azure Virtual Network"
-  default     = "az-vnet-hce-dnsresolver-network-dev-01"
+  default     = "az-vnet-it-dnsresolver-network-nonprod-01"
+}
+
+ariable "nsg_name" {
+  description = "Name of network security group"
+  default     = "az-nsg-it-dnsresolver-network-nonprod-01"
 }
 
 variable "vnet_address_space" {
@@ -85,20 +89,20 @@ variable "dns_servers" {
 
 variable "disk_access_name" {
   description = "disk access name"
-  default     = "az-da-hce-dnsresolver-dev-01"
+  default     = "az-da-it-dnsresolver-nonprod-01"
 }
 
 variable "route_tables" {
   description = "For each route table, create an object that contain fields"
   default = {
-    az-rt_hce-dnsresolver_dev_01 = {
-      rt_name = "az-rt-hce-dnsresolver-dev-01"
+    az-rt_dnsresolver_nonprod_01 = {
+      rt_name = "az-rt-dnsresolver-nonprod-01"
       routes = [
-        { name = "default", address_prefix = "0.0.0.0/0", next_hop_type = "VirtualAppliance", next_hop_in_ip_address = "10.10.10.10" }
+        { name = "default", address_prefix = "0.0.0.0/0", next_hop_type = "VirtualAppliance", next_hop_in_ip_address = "10.10.10.1" }
       ]
     },
-    az_rt_apg_dnsresolver_dev_01 = {
-      rt_name = "az-rt-hce-apg-dnsresolver-dev-01"
+    azu_rt_apg_dnsresolver_nonprod_01 = {
+      rt_name = "az-rt-apg-dnsresolver-nonprod-01"
       routes = [
         { name = "default", address_prefix = "0.0.0.0/0", next_hop_type = "Internet" }
       ]
@@ -106,18 +110,42 @@ variable "route_tables" {
   }
 }
 
+variable "nsgs" {
+  description = "For each network security group, create an object that contain fields"
+  default = {
+    nsg_vnet = {
+      name = "az-nsg-it-dnsresolver-network-nonprod-01"
+      tags = {
+        DataClassification = "internal"
+        Owner              = "hce"
+        Platform           = "hce"
+        Environment        = "dev"
+      }
+    },
+    nsg_apg = {
+      name = "az-nsg-apg-dnsresolver-nonprod-01"
+      tags = {
+        DataClassification = "internal"
+        Owner              = "hce"
+        Platform           = "hce"
+        Environment        = "dev"
+      }
+    }
+  }
+}
+
 variable "subnets" {
   description = "For each subnet, create an object that contain fields"
   default = {
-  hce_vm_subnet = {
-      subnet_name            = "az-snet-hce-dnsresolver-dev-01"
+  hce_vm_subne = {
+      subnet_name            = "az-snet-it-dnsresolver-nonprod-01"
       subnet_address_prefix  = ["10.10.10.0/26"]
-      nsg_name               = "az-nsg-hce-dnsresolver-dev-01"
       service_endpoints      = ["Microsoft.Storage"]
-      rt_name                = "az-rt-hce-dnsresolver-dev-01"
+      rt_name                = "az-rt-dnsresolver-nonprod-01"
+      nsg_name               = "az-nsg-it-dnsresolver-network-nonprod-01"
       delegations            = []
       private_endpoint_network_policies_enabled = false
-      private_endpoint_name  = "az-pe-hce-dnsresolver-dev-01"
+      private_endpoint_name  = "az-pe-it-dnsresolver-nonprod-01"
       tags = {
         DataClassification = "internal"
         Owner              = "hce"
@@ -126,15 +154,14 @@ variable "subnets" {
       }
     },
   hce_management_subnet = {
-      subnet_name            = "az-snet-hce-management-dev-01"
+      subnet_name            = "az-snet-it-management-nonprod-01"
       subnet_address_prefix  = ["10.10.10.64/27"]
-      nsg_name               = "az-nsg-hce-management-dev-011"
       service_endpoints      = ["Microsoft.Storage","Microsoft.Sql"]
-      rt_name                = "az-rt-hce-dnsresolver-dev-01"
-      delegations            = [ { delegationname = "Microsoft.Web.serverFarms", name = "Microsoft.Web/serverFarms", actions = ["Microsoft.Network/virtualNetworks/subnets/action"] }]
+      rt_name                = "az-rt-dnsresolver-nonprod-01"
+      nsg_name               = "az-nsg-it-dnsresolver-network-nonprod-01"
+      delegations            = []
       private_endpoint_network_policies_enabled = false
-      private_endpoint_name  = "az-pe-hce-management-dev-01"
-
+      private_endpoint_name  = "az-pe-it-management-nonprod-01"
       tags = {
         DataClassification = "internal"
         Owner              = "hce"
@@ -143,14 +170,14 @@ variable "subnets" {
       }
     },
   hce_dmz_subnet = {
-      subnet_name            = "az-snet-hce-dmz-dev-01"
+      subnet_name            = "az-snet-it-dmz-nonprod-01"
       subnet_address_prefix  = ["10.10.10.96/28"]
-      nsg_name               = "az-nsg-hce-dmz-dev-01"
       service_endpoints      = ["Microsoft.Storage"]
-      rt_name                = "az-rt-hce-apg-dnsresolver-dev-01"
+      rt_name                = "az-rt-apg-dnsresolver-nonprod-01"
+      nsg_name               = "az-nsg-apg-dnsresolver-nonprod-01"
       delegations            = [ { delegationname = "Microsoft.Web.serverFarms", name = "Microsoft.Web/serverFarms", actions = ["Microsoft.Network/virtualNetworks/subnets/action"] }]
       private_endpoint_network_policies_enabled = false
-      private_endpoint_name  = "az-pe-hce-dmz-dev-01"
+      private_endpoint_name  = "az-pe-it-dmz-nonprod-01"
       tags = {
         DataClassification = "internal"
         Owner              = "hce"
@@ -167,7 +194,7 @@ terraform {
   required_providers {
     azurerm = {
       source = "hashicorp/azurerm"
-      version = "3.44.1"
+      version = "3.97.1"
     }
   }
  #  backend "azurerm" {
@@ -198,13 +225,13 @@ provider "azurerm" {
 Name | Version
 -----|--------
 terraform | >= 1.1.9
-azurerm | = 3.44.1
+azurerm | = 3.97.1
 
 ## Providers
 
 | Name | Version |
 |------|---------|
-azurerm | = 3.44.1
+azurerm | = 3.97.1
 
 ## Inputs
 
@@ -219,6 +246,7 @@ Name | Description | Type | Default
 `route_tables`|For each route, create an object that contain fields|object|`{}`
 `default_tags`|A map of tags to add |map|`{}`
 `disk_access_name`|The name of the disk access| string | `""`
+`nsg_name`|The name of network security group| string | `""`
 
 ## Outputs
 
