@@ -11,7 +11,7 @@ provider "azurerm" {
 }
 
 module "role-assignement" {
-  source  = "git::https://<git_address>/hce-public/modules.git//RoleAssignement"
+  source  = "git::https://<git_address>/hce-public/modules.git//RoleAssignement?ref=v3.97.1""
 
   # Adding roles and scope to service principal
   assignments = [
@@ -26,6 +26,30 @@ module "role-assignement" {
       principal_id         = "111-1111-11-111-1111"
     }
   ]
+}
+```
+```hcl
+# providers.tf configuration
+terraform {
+  required_providers {
+    azurerm = {
+      source = "hashicorp/azurerm"
+      version = "3.97.1"
+    }
+  }
+  backend "azurerm" {
+    resource_group_name  = "<rg_name>"
+    storage_account_name = "<sa_name>"
+    container_name       = "<container_name>"
+    key                  = "/subscription/<sub_name>/prod/IAM/terraform.tfstate"
+  }
+
+}
+
+provider "azurerm" {
+  subscription_id        = "xxx-xxx-xxx-xxx-xxx"
+  tenant_id              = "xxx-xxx-xxx-xxx-xxx"
+  features {}
 }
 ```
 
