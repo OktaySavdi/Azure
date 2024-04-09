@@ -1,11 +1,5 @@
 # Azure virtual machine
 
-## Notice on new alternative virtual machine module
-
-This module was designed and implemented for AzureRM Provider v2.x, It's impossible to refactor this module from `azurerm_virtual_machine` to the modern version `azurerm_linux_virtual_machine` and `azurerm_windows_virtual_machine`. 
-
-## Usage in Terraform
-
 **providers.tf**
 ```hcl
 terraform {
