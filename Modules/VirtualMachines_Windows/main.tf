@@ -3,33 +3,6 @@ data "azurerm_disk_access" "disk_access" {
   resource_group_name = var.disk_access_resource_group_name
 }
 
-# enable if you want to use disk snapshot instead of image referance
-#resource "azurerm_snapshot" "example" {
-#  name                = "<snapshot-name>"
-#  location            = "germanywestcentral"
-#  resource_group_name = "<rg>"
-#  create_option       = "Copy"
-#  source_uri          = "/subscriptions/<subscription_id>/resourceGroups/<rg>/providers/Microsoft.Compute/disks/<disk_name>"
-#}
-
-resource "azurerm_managed_disk" "os_disk" {
-  name                 = "az-disk-${var.vm_hostname}-${var.team_name}-${var.environment}"
-  location             = var.location
-  resource_group_name  = var.resource_group_name
-  storage_account_type = var.data_sa_type
-  create_option        = "FromImage"
-  gallery_image_reference_id  = var.gallery_image_reference_id
-  #source_resource_id   = azurerm_snapshot.example.id # enable if you want to use disk snapshot instead of image referance
-  os_type              = var.os_type
-
-  disk_size_gb = var.data_disk_size_gb
-  tags         = var.tags
-
-  network_access_policy         = var.network_access_policy
-  disk_access_id                = data.azurerm_disk_access.disk_access.id
-  public_network_access_enabled = var.public_network_access_enabled
-}
-
 resource "azurerm_network_interface" "vm" {
   location                      = var.location
   name                          = "az-nic-${var.vm_hostname}-${var.team_name}-${var.environment}"
@@ -56,69 +29,58 @@ resource "azurerm_availability_set" "vm" {
   tags                         = var.tags
 }
 
-resource "azurerm_virtual_machine" "vm_windows" {
-  location                         = var.location
-  name                             = "az-vm-${var.vm_hostname}-${var.team_name}-${var.environment}"
-  network_interface_ids            = ["${azurerm_network_interface.vm.id}"]
-  resource_group_name              = var.resource_group_name
-  vm_size                          = var.vm_size
-  availability_set_id              = var.availability_set_enabled ? azurerm_availability_set.vm[0].id : null
-  delete_data_disks_on_termination = var.delete_data_disks_on_termination
-  delete_os_disk_on_termination    = var.delete_os_disk_on_termination
-  zones                            = var.availability_set_enabled ? null : var.zones
-  tags                             = var.tags
+#---------------------------------------
+# Windows Virutal machine
+#---------------------------------------
+resource "azurerm_windows_virtual_machine" "win_vm" {
+  name                         = "az-vm-${var.vm_hostname}-${var.team_name}-${var.environment}"
+  computer_name                = var.vm_hostname
+  resource_group_name          = var.resource_group_name
+  location                     = var.location
+  size                         = var.size
+  admin_username               = var.admin_username
+  admin_password               = var.admin_password
+  network_interface_ids        = ["${azurerm_network_interface.vm.id}"]
+  source_image_id              = var.source_image_id != null ? var.source_image_id : null
+  provision_vm_agent           = true
+  allow_extension_operations   = true
+  secure_boot_enabled          = true
+  availability_set_id          = var.availability_set_enabled ? azurerm_availability_set.vm[0].id : null
+  zone                         = var.zone
+  timezone                     = var.timezone
+  tags                         = var.tags
 
-  ## we used disk attach thay's why it mush be disable
-  #storage_image_reference {
-  #  publisher = var.vm_os_publisher
-  #  offer     = var.vm_os_offer
-  #  sku       = var.vm_os_sku
-  #  version   = "latest"
-  #}
-
-  storage_os_disk {
-    create_option   = "Attach"
-    name            = "az-disk-${var.vm_hostname}-${var.team_name}-${var.environment}"
-    caching         = "ReadWrite"
-    managed_disk_id = azurerm_managed_disk.os_disk.id
-    os_type         = var.os_type
-  }
-
-  dynamic "identity" {
-    for_each = length(var.identity_ids) == 0 && var.identity_type == "SystemAssigned" ? [var.identity_type] : []
-
+  dynamic "source_image_reference" {
+    for_each = var.source_image_id != null ? [] : [1]
     content {
-      type = var.identity_type
+      publisher = var.os_image_referance != null ? var.vm_os_publisher : null
+      offer     = var.os_image_referance != null ? var.vm_os_offer : null
+      sku       = var.os_image_referance != null ? var.vm_os_sku : null
+      version   = var.os_image_referance != null ? var.vm_os_version : null
     }
   }
-  dynamic "identity" {
-    for_each = length(var.identity_ids) > 0 || var.identity_type == "UserAssigned" ? [var.identity_type] : []
 
+  os_disk {
+    storage_account_type      = var.data_sa_type
+    caching                   = "ReadWrite"
+    disk_size_gb              = var.data_disk_size_gb
+    write_accelerator_enabled = var.write_accelerator_enabled != null ? var.write_accelerator_enabled : null
+    name                      = "az-disk-${var.vm_hostname}-${var.team_name}-${var.environment}"
+  }
+
+  dynamic "identity" {
+    for_each = var.identity_type != null ? [1] : []
     content {
       type         = var.identity_type
-      identity_ids = length(var.identity_ids) > 0 ? var.identity_ids : []
+      identity_ids = var.identity_ids == "UserAssigned" || var.identity_type == "SystemAssigned, UserAssigned" ? var.identity_ids : null
     }
-  }
- 
-  ## we used disk attach thay's why it mush be disable
-  #os_profile { # https://learn.microsoft.com/en-us/azure/virtual-machines/troubleshooting-shared-images#creating-or-updating-a-vm-or-scale-sets-from-an-image-version
-  #  admin_username = var.admin_username
-  #  computer_name  = "az-vm-${var.vm_hostname}-${var.team_name}-${var.environment}"
-  #  admin_password = var.admin_password
-  #  #custom_data   = var.custom_data
-  #}
-
-  os_profile_windows_config {
-    provision_vm_agent = var.provision_vm_agent
-    enable_automatic_upgrades = var.enable_automatic_upgrades
-    timezone = var.timezone
   }
 
   lifecycle {
-    precondition {
-      condition     = var.nested_data_disks || var.delete_data_disks_on_termination != true
-      error_message = "`var.nested_data_disks` must be `true` when `var.delete_data_disks_on_termination` is `true`, because when you declare data disks via separate managed disk resource, you might want to preserve the data while recreating the vm instance."
-    }
+    ignore_changes = [
+      tags,
+      patch_mode,
+    ]
   }
 }
 
@@ -129,7 +91,7 @@ resource "azurerm_managed_disk" "extra_disks" {
   network_access_policy         = var.network_access_policy
   disk_access_id                = data.azurerm_disk_access.disk_access.id
   public_network_access_enabled = var.public_network_access_enabled
-  os_type                       = var.os_type
+  #os_type                       = var.os_type
 
   name                 = var.extra_disks[count.index].name
   create_option        = var.extra_disks[count.index].create_option
@@ -141,12 +103,12 @@ resource "azurerm_managed_disk" "extra_disks" {
 
 resource "azurerm_virtual_machine_data_disk_attachment" "vm_extra_disk_attachments" {
   count              = length(azurerm_managed_disk.extra_disks)
-  virtual_machine_id = azurerm_virtual_machine.vm_windows.id
+  virtual_machine_id = azurerm_windows_virtual_machine.win_vm.id
   managed_disk_id    = azurerm_managed_disk.extra_disks[count.index].id
   lun                = count.index
   caching            = "ReadWrite"
 
-  depends_on = [azurerm_managed_disk.extra_disks, azurerm_virtual_machine.vm_windows]
+  depends_on = [azurerm_managed_disk.extra_disks, azurerm_windows_virtual_machine.win_vm]
 }
 
 resource "azurerm_virtual_machine_extension" "extension" {
@@ -155,42 +117,11 @@ resource "azurerm_virtual_machine_extension" "extension" {
   publisher                   = var.vm_extensions[count.index].publisher
   type                        = var.vm_extensions[count.index].type
   type_handler_version        = var.vm_extensions[count.index].type_handler_version
-  virtual_machine_id          = azurerm_virtual_machine.vm_windows.id
+  virtual_machine_id          = azurerm_windows_virtual_machine.win_vm.id
   auto_upgrade_minor_version  = var.vm_extensions[count.index].auto_upgrade_minor_version
   automatic_upgrade_enabled   = var.vm_extensions[count.index].automatic_upgrade_enabled
   failure_suppression_enabled = var.vm_extensions[count.index].failure_suppression_enabled
   settings                    = var.vm_extensions[count.index].settings
 
-  depends_on = [azurerm_virtual_machine.vm_windows, azurerm_managed_disk.extra_disks]
+  depends_on = [azurerm_windows_virtual_machine.win_vm, azurerm_managed_disk.extra_disks]
 }
-
-#resource "null_resource" "reset_password" {
-#  triggers = {
-#    id = azurerm_virtual_machine.vm_windows.id
-#  }
-#  provisioner "local-exec" {
-#    command = <<EOT
-#    subscriptionId = $ARM_SUBSCRIPTION_ID
-#    tenantId = $ARM_TENANT_ID
-#    clientId = $ARM_CLIENT_ID
-#    secret = $ARM_CLIENT_SECRET
-#
-#    az login --service-principal --username $clientId --password $secret --tenant $tenantId
-#    az account set --subscription ${var.subscription_id}
-#    az vm user update --resource-group ${var.resource_group_name} --name ${format("az-vm-%s-%s-%s", var.vm_hostname, var.team_name, var.environment)} --username ${var.admin_username} --password ${var.admin_password}
-#    EOT
-#  }
-#  depends_on = [azurerm_virtual_machine.vm_windows]
-#}
-
-# Use a null_resource to call az command to set disk access on the disk, only trigger when vm id is changed
-#resource "null_resource" "update_disk_access" {
-#  triggers = {
-#    id = azurerm_virtual_machine.vm_windows.id
-#  }
-#
-#  provisioner "local-exec" {
-#    command = "az disk update --resource-group ${var.resource_group_name} --name az-disk-${var.vm_hostname}-${var.team_name}-${var.environment} --network-access-policy ${var.network_access_policy} --disk-access ${data.azurerm_disk_access.disk_access.id}"
-#  }
-#  depends_on = [ azurerm_virtual_machine.vm_windows ]
-#}
