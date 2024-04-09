@@ -1,17 +1,17 @@
 resource "azurerm_public_ip" "publc_ip" {
-  name                  = var.public_ip_name
-  resource_group_name   = var.resource_group_name
-  location              = var.location
-  allocation_method     = var.allocation_method
-  sku                   = var.public_ip_sku
-  tags                  = var.tags
+  name                = var.public_ip_name
+  resource_group_name = var.resource_group_name
+  location            = var.location
+  allocation_method   = var.allocation_method
+  sku                 = var.public_ip_sku
+  tags                = var.tags
 }
 
 resource "azurerm_nat_gateway" "nat_gateway" {
-  name                    = var.nat_gateway_name
-  location                = var.location
-  resource_group_name     = var.resource_group_name
-  tags                    = var.tags
+  name                = var.nat_gateway_name
+  location            = var.location
+  resource_group_name = var.resource_group_name
+  tags                = var.tags
 }
 
 resource "azurerm_nat_gateway_public_ip_association" "nat_gateway_public_ip_association" {
