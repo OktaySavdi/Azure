@@ -100,7 +100,7 @@ resource "azurerm_virtual_network_gateway" "vpngw" {
 #---------------------------
 resource "azurerm_local_network_gateway" "localgw" {
   count               = length(var.local_networks)
-  name                = var.local_gw_name
+  name                = var.local_networks[count.index].local_gw_name
   resource_group_name = data.azurerm_resource_group.rg.name
   location            = data.azurerm_resource_group.rg.location
   gateway_address     = var.local_networks[count.index].local_gateway_address
