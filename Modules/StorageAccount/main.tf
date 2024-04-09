@@ -15,9 +15,9 @@ resource "azurerm_storage_account" "storeacc" {
   allow_nested_items_to_be_public = var.allow_nested_items_to_be_public //do not allow public blobs for example
 
   network_rules {
-    default_action = "Deny"                             // (Required) Specifies the default action of allow or deny when no other rules match. Valid options are Deny or Allow.
-    ip_rules       = ["65.16.34.123", "23.124.113.43"] // (Optional) List of public IP or IP ranges in CIDR Format. Only IPv4 addresses are allowed. Private IP address ranges (as defined in RFC 1918) are not allowed.
-    bypass         = ["AzureServices"]                  //(Optional) Specifies whether traffic is bypassed for Logging/Metrics/AzureServices. Valid options are any combination of Logging, Metrics, AzureServices, or None
+    default_action = "Deny"                                              // (Required) Specifies the default action of allow or deny when no other rules match. Valid options are Deny or Allow.
+    ip_rules       = ["185.16.77.248", "185.16.77.249", "94.136.115.13"] // (Optional) List of public IP or IP ranges in CIDR Format. Only IPv4 addresses are allowed. Private IP address ranges (as defined in RFC 1918) are not allowed.
+    bypass         = ["AzureServices"]                                   //(Optional) Specifies whether traffic is bypassed for Logging/Metrics/AzureServices. Valid options are any combination of Logging, Metrics, AzureServices, or None
   }
 
   blob_properties {
