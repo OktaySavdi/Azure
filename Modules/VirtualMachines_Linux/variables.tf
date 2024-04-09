@@ -90,11 +90,6 @@ variable "enable_ip_forwarding" {
   description = "(Optional) Should IP Forwarding be enabled? Defaults to `false`."
 }
 
-variable "enable_ssh_key" {
-  type        = bool
-  description = "(Optional) Enable ssh key authentication in Linux virtual Machine."
-}
-
 variable "extra_ssh_keys" {
   type        = list(string)
   default     = []
@@ -149,7 +144,7 @@ variable "vm_hostname" {
   default     = "myvm"
 }
 
-variable "vm_size" {
+variable "size" {
   type        = string
   description = "Specifies the size of the virtual machine."
 }
@@ -170,11 +165,6 @@ variable "environment" {
   type        = string
 }
 
-variable "os_type" {
-  type        = string
-  description = "(required) Operating System. Possible values Linux or Windows"
-}
-
 variable "network_access_policy" {
   description = "Policy for accessing the disk via network."
   type        = string
@@ -192,11 +182,6 @@ variable "disk_access_resource_group_name" {
 
 variable "virtual_machines" {
   description = "For each virtual_machines, create an object that contain fields"
-  default     = {}
-}
-
-variable "os_image_referance" {
-  description = "An example variable"
   default     = {}
 }
 
@@ -220,11 +205,6 @@ variable "extra_disks" {
   default     = []
 }
 
-variable "zones" {
-  description = "An example variable"
-  default     = []
-}
-
 variable "vm_extensions" {
   description = "(Optional) List of extra data disks attached to each virtual machine."
   default     = []
@@ -239,4 +219,24 @@ variable "subscription_id" {
   description = "(Optional) Specifies the subscription_id"
   type        = string
   default     = "xxx-xxx-xxx-xxx-xxx"
+}
+
+variable "source_image_id" {
+  description = "(Optional) The ID of the Image which this Virtual Machine should be created from. Changing this forces a new resource to be created. Possible Image ID types include Image IDs, Shared Image IDs, Shared Image Version IDs, Community Gallery Image IDs, Community Gallery Image Version IDs, Shared Gallery Image IDs and Shared Gallery Image Version IDs"
+  type        = string
+}
+
+variable "disable_password_authentication" {
+  description = "(Optional) Should Password Authentication be disabled on this Virtual Machine? Defaults to true. Changing this forces a new resource to be created."
+  type        = bool
+}
+
+variable "admin_ssh_key_data" {
+  description = "specify the path to the existing SSH key to authenticate Linux virtual machine"
+  default     = null
+}
+
+variable "os_image_referance" {
+  description = "An example variable"
+  default     = {}
 }
