@@ -158,7 +158,7 @@ module "virtual_machine" {
 }
 ```
 **variables.tf**
-```
+```hcl
 variable "location" {
   description = "Specifies the Azure Region where the Virtual Machine exists. Changing this forces a new resource to be created"
   type        = string
