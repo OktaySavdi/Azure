@@ -51,18 +51,16 @@ module "storage" {
   # Storage queues
   #queues = ["queue1", "queue2"]
   
-  # CORS rules for storage account.
-  cors_rule = {
-    allowed_origins = [
-       "http://myurl1.mydomain.lan",
-       "http://myurl2.mydomain.lan",
-       "http://myurl3.mydomain.lan",
-    ]
-    allowed_methods = ["DELETE","GET","HEAD","MERGE","POST","OPTIONS","PUT","PATCH"]
-    allowed_headers = ["*"]
-    exposed_headers = ["*"]
-    max_age_in_seconds = 5
-  }
+  #cors_rule = {
+  #  allowed_origins = [
+  #    "http://example.com",
+  #    "https://example.com"
+  #  ]
+  #  allowed_methods    = ["DELETE", "GET", "HEAD", "MERGE", "POST", "OPTIONS", "PUT", "PATCH"]
+  #  allowed_headers    = ["Authorization"]
+  #  exposed_headers    = ["Cache-Control", "Content-Language"]
+  #  max_age_in_seconds = 3600
+  #}
   
   tags = var.tags
 }
