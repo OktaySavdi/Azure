@@ -12,7 +12,7 @@ terraform {
   required_providers {
     azurerm = {
       source  = "hashicorp/azurerm"
-      version = "3.65.0"
+      version = "3.97.1"
     }
   }
  #  backend "azurerm" {
@@ -41,15 +41,18 @@ provider "azurerm" {
 **terraform.tfvars**
 ```hcl
 location                      = "germanywestcentral"
-subscription_id               = "xxxx-xxxxx-xxxxx-xxxxx"
-vm_hostname                   = "myserver"
-vnet_subnet_id                = "/subscriptions/<susbscription_id>/resourceGroups/<rg_name>/providers/Microsoft.Network/virtualNetworks/<vnet_name>/subnets/<subnet_name>"
+subscription_id               = "xxxx-xxxx-xxxx-xxxx-xxxx"
+resource_group_name           = "az-rg-hce-test-01"
+vm_hostname                   = "myserver" # max 15 characters
 environment                   = "test-01"
 team_name                     = "hce"
-resource_group_name           = "az-rg-hce-test-01"
-zones                         = []
+admin_username                = "azureuser"
+admin_password                = "P@$$w0rd1234!"
 identity_type                 = "SystemAssigned"
+size                          = "Standard_B2s"
 identity_ids                  = []
+vnet_subnet_id                = "/subscriptions/<sub_id>/resourceGroups/<rg_name>/providers/Microsoft.Network/virtualNetworks/<vnet_name>/subnets/<subnet_name>"
+source_image_id               = "/subscriptions/<sub_id>/resourceGroups/<rg_name>/providers/Microsoft.Compute/galleries/<gallery_name>/images/<image_name>/versions/<version>"
 data_sa_type                  = "Standard_LRS" #(Required) Possible values are Standard_LRS, StandardSSD_ZRS, Premium_LRS, PremiumV2_LRS, Premium_ZRS, StandardSSD_LRS or UltraSSD_LRS
 data_disk_size_gb             = "127"
 network_access_policy         = "AllowPrivate" #(Required) Policy for accessing the disk via network. Allowed values are AllowPrivate, and DenyAll
@@ -68,14 +71,13 @@ availability_set = {
   as_platform_update_domain_count = 1
 }
 
-### az vm image list --output table
+### az vm image list --output table 
+### Put null if you specified source_image_id
 os_image_referance = {
-  os_type                          = "Windows"
-  image_version                    = "0.0.2"
-  image_name                       = "az_id_hce_dev_01"
-  gallery_name                     = "az_sig_hce_dev_01"
-  shared_image_resource_group_name = "os1"
-  vm_size                          = "Standard_B2s"
+  vm_os_offer     = null #"WindowsServer"
+  vm_os_publisher = null #"MicrosoftWindowsServer"
+  vm_os_sku       = null #"2022-datacenter-g2"
+  version         = null #"latest"
 }
 
 disk_access_conf = {
@@ -93,6 +95,7 @@ add_on = {
   provision_vm_agent               = true                      #(Optional) Should the Azure Virtual Machine Guest Agent be installed on this Virtual Machine? Defaults to false.
   timezone                         = "W. Europe Standard Time" #(Optional) Specifies the time zone of the virtual machine, the possible values are defined here. Changing this forces a new resource to be created.
 }
+
 
 extra_disks = [
   {
@@ -124,34 +127,31 @@ vm_extensions = [
 ```
 **main.tf**
 ```hcl
-data "azurerm_shared_image_version" "existing" {
-  provider            = azurerm.gallery-image
-  name                = var.os_image_referance["image_version"]
-  image_name          = var.os_image_referance["image_name"]
-  gallery_name        = var.os_image_referance["gallery_name"]
-  resource_group_name = var.os_image_referance["shared_image_resource_group_name"]
-}
-
 module "virtual_machine" {
-  source                           = "git::https://<repo_address>/hce-public/modules.git//VirtualMachines_Windows?ref=3.65.0"
+  source                           = "git::https://myrepo.lan/modules.git//VirtualMachines_Windows?ref=v3.97.1"
   resource_group_name              = var.resource_group_name
   subscription_id                  = var.subscription_id
   location                         = var.location
   environment                      = var.environment
-  zones                            = var.zones
   extra_disks                      = var.extra_disks
   vm_extensions                    = var.vm_extensions
   team_name                        = var.team_name
   identity_ids                     = var.identity_ids
   vm_hostname                      = var.vm_hostname
-  gallery_image_reference_id       = data.azurerm_shared_image_version.existing.id
-  vm_size                          = var.os_image_referance["vm_size"]
-  os_type                          = var.os_image_referance["os_type"]
+  admin_username                   = var.admin_username
+  admin_password                   = var.admin_password
+  source_image_id                  = var.source_image_id
+  size                             = var.size
+  write_accelerator_enabled        = var.write_accelerator_enabled
   disk_access_name                 = var.disk_access_conf["disk_access_name"]
   disk_access_resource_group_name  = var.disk_access_conf["disk_access_resource_group_name"]
   as_platform_fault_domain_count   = var.availability_set["as_platform_fault_domain_count"]
   as_platform_update_domain_count  = var.availability_set["as_platform_update_domain_count"]
   availability_set_enabled         = var.availability_set["availability_set_enabled"]
+  vm_os_publisher                  = var.os_image_referance["vm_os_publisher"]
+  vm_os_offer                      = var.os_image_referance["vm_os_offer"]
+  vm_os_sku                        = var.os_image_referance["vm_os_sku"]
+  vm_os_version                    = var.os_image_referance["version"]
   identity_type                    = var.identity_type
   vnet_subnet_id                   = var.vnet_subnet_id
   data_sa_type                     = var.data_sa_type
@@ -170,7 +170,7 @@ module "virtual_machine" {
 }
 ```
 **variables.tf**
-```
+```hcl
 variable "location" {
   description = "Specifies the Azure Region where the Virtual Machine exists. Changing this forces a new resource to be created"
   type        = string
@@ -224,11 +224,6 @@ variable "data_sa_type" {
   default     = ""
 }
 
-variable "zones" {
-  description = "The Availability Zone which the Virtual Machine should be allocated in, only one zone would be accepted. If set then this module won't create azurerm_availability_set resource. Changing this forces a new resource to be created."
-  default     = []
-}
-
 variable "network_access_policy" {
   description = "Policy for accessing the disk via network."
   type        = string
@@ -238,6 +233,11 @@ variable "network_access_policy" {
 variable "data_disk_size_gb" {
   description = "Storage data disk size size."
   type        = number
+}
+
+variable "size" {
+  type        = string
+  description = "Specifies the size of the virtual machine."
 }
 
 variable "availability_set" {
@@ -276,70 +276,42 @@ variable "public_network_access_enabled" {
   default     = ""
 }
 
-variable "os_image_referance" {
-  description = "An example variable"
-  default     = {}
-}
-
-variable "gallery_image_reference_id" {
-  description = "(Optional) ID of a Gallery Image Version to copy when create_option is FromImage. This field cannot be specified if image_reference_id is specified. Changing this forces a new resource to be created."
-  type        = string
-  default     = ""
-}
-
-variable "image_version" {
-  description = "The name of the Image Version."
-  type        = string
-  default     = ""
-}
-
-variable "image_name" {
-  description = "The name of the Shared Image in which this Version exists."
-  type        = string
-  default     = ""
-}
-
-variable "gallery_name" {
-  description = "The name of the Shared Image Gallery in which the Shared Image exists."
-  type        = string
-  default     = ""
-}
-
-variable "shared_image_resource_group_name" {
-  description = "The name of the Resource Group in which the Shared Image Gallery exists."
-  type        = string
-  default     = ""
-}
-
 variable "subscription_id" {
   description = "(Optional) Specifies the subscription_id"
   type        = string
   default     = "xxx-xxx-xxx-xxx-xxx"
 }
+
+variable "admin_password" {
+  description = " (Required) The Password which should be used for the local-administrator on this Virtual Machine. Changing this forces a new resource to be created."
+  type        = string
+  default     = ""
+}
+
+variable "admin_username" {
+  description = " (Required) The username of the local administrator used for the Virtual Machine. Changing this forces a new resource to be created."
+  type        = string
+  default     = ""
+}
+
+variable "source_image_id" {
+  description = "(Optional) The ID of the Image which this Virtual Machine should be created from. Changing this forces a new resource to be created. Possible Image ID types include Image IDs, Shared Image IDs, Shared Image Version IDs, Community Gallery Image IDs, Community Gallery Image Version IDs, Shared Gallery Image IDs and Shared Gallery Image Version IDs"
+  type        = string
+}
+
+variable "write_accelerator_enabled" {
+  description = "(Optional) Are automatic updates enabled on this Virtual Machine? Defaults to false."
+  type        = bool
+  default     = false
+}
+
+variable "os_image_referance" {
+  description = "An example variable"
+  default     = {}
+}
 ```
 **outputs.tf**
 ```hcl
-output "os_disk_name" {
-  value = module.virtual_machine.os_disk_name
-}
-output "os_disk_gallery_image_reference_id" {
-  value = module.virtual_machine.os_disk_gallery_image_reference_id
-}
-output "os_disk_size_gb" {
-  value = module.virtual_machine.os_disk_size_gb
-}
-output "os_disk_network_access_policy" {
-  value = module.virtual_machine.os_disk_network_access_policy
-}
-output "os_disk_access_id" {
-  value = module.virtual_machine.os_disk_access_id
-}
-output "os_disk_public_network_access_enabled" {
-  value = module.virtual_machine.os_disk_public_network_access_enabled
-}
-output "network_interface_name" {
-  value = module.virtual_machine.network_interface_name
-}
 output "virtual_machine_name" {
   value = module.virtual_machine.virtual_machine_name
 }
@@ -355,6 +327,7 @@ output "extra_disks_name" {
 output "virtual_machine_extension_name" {
   value = module.virtual_machine.virtual_machine_extension_name
 }
+
 ```
 <!-- BEGIN_TF_DOCS -->
 ## Requirements
@@ -362,13 +335,13 @@ output "virtual_machine_extension_name" {
 | Name | Version |
 |------|---------|
 | <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | >= 1.1.9 |
-| <a name="requirement_azurerm"></a> [azurerm](#requirement\_azurerm) | 3.65.0 |
+| <a name="requirement_azurerm"></a> [azurerm](#requirement\_azurerm) | 3.97.1 |
 
 ## Providers
 
 | Name | Version |
 |------|---------|
-| <a name="provider_azurerm"></a> [azurerm](#provider\_azurerm) | 3.65.0 |
+| <a name="provider_azurerm"></a> [azurerm](#provider\_azurerm) | 3.97.1 |
 
 ## Resources
 
@@ -376,11 +349,10 @@ output "virtual_machine_extension_name" {
 |------|------|
 | [azurerm_availability_set.vm](https://registry.terraform.io/providers/hashicorp/azurerm/3.65.0/docs/resources/availability_set) | resource |
 | [azurerm_managed_disk.extra_disks](https://registry.terraform.io/providers/hashicorp/azurerm/3.65.0/docs/resources/managed_disk) | resource |
-| [azurerm_managed_disk.os_disk](https://registry.terraform.io/providers/hashicorp/azurerm/3.65.0/docs/resources/managed_disk) | resource |
 | [azurerm_network_interface.vm](https://registry.terraform.io/providers/hashicorp/azurerm/3.65.0/docs/resources/network_interface) | resource |
-| [azurerm_virtual_machine.vm_windows](https://registry.terraform.io/providers/hashicorp/azurerm/3.65.0/docs/resources/virtual_machine) | resource |
 | [azurerm_virtual_machine_data_disk_attachment.vm_extra_disk_attachments](https://registry.terraform.io/providers/hashicorp/azurerm/3.65.0/docs/resources/virtual_machine_data_disk_attachment) | resource |
 | [azurerm_virtual_machine_extension.extension](https://registry.terraform.io/providers/hashicorp/azurerm/3.65.0/docs/resources/virtual_machine_extension) | resource |
+| [azurerm_windows_virtual_machine.win_vm](https://registry.terraform.io/providers/hashicorp/azurerm/3.65.0/docs/resources/windows_virtual_machine) | resource |
 | [azurerm_disk_access.disk_access](https://registry.terraform.io/providers/hashicorp/azurerm/3.65.0/docs/data-sources/disk_access) | data source |
 
 ## Inputs
@@ -388,6 +360,8 @@ output "virtual_machine_extension_name" {
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
 | <a name="input_add_on"></a> [add\_on](#input\_add\_on) | An example variable | `map` | `{}` | no |
+| <a name="input_admin_password"></a> [admin\_password](#input\_admin\_password) | (Required) The Password which should be used for the local-administrator on this Virtual Machine. Changing this forces a new resource to be created. | `string` | n/a | yes |
+| <a name="input_admin_username"></a> [admin\_username](#input\_admin\_username) | (Required) The username of the local administrator used for the Virtual Machine. Changing this forces a new resource to be created. | `string` | n/a | yes |
 | <a name="input_as_platform_fault_domain_count"></a> [as\_platform\_fault\_domain\_count](#input\_as\_platform\_fault\_domain\_count) | (Optional) Specifies the number of fault domains that are used. Defaults to `2`. Changing this forces a new resource to be created. | `number` | n/a | yes |
 | <a name="input_as_platform_update_domain_count"></a> [as\_platform\_update\_domain\_count](#input\_as\_platform\_update\_domain\_count) | (Optional) Specifies the number of update domains that are used. Defaults to `2`. Changing this forces a new resource to be created. | `number` | n/a | yes |
 | <a name="input_availability_set"></a> [availability\_set](#input\_availability\_set) | An example variable | `map` | `{}` | no |
@@ -404,17 +378,17 @@ output "virtual_machine_extension_name" {
 | <a name="input_enable_ip_forwarding"></a> [enable\_ip\_forwarding](#input\_enable\_ip\_forwarding) | (Optional) Should IP Forwarding be enabled? Defaults to `false`. | `bool` | n/a | yes |
 | <a name="input_environment"></a> [environment](#input\_environment) | Environment name. Possible values are stg and prod | `string` | n/a | yes |
 | <a name="input_extra_disks"></a> [extra\_disks](#input\_extra\_disks) | (Optional) List of extra data disks attached to each virtual machine. | `list` | `[]` | no |
-| <a name="input_gallery_image_reference_id"></a> [gallery\_image\_reference\_id](#input\_gallery\_image\_reference\_id) | (Optional) ID of a Gallery Image Version to copy when create\_option is FromImage. This field cannot be specified if image\_reference\_id is specified. Changing this forces a new resource to be created. | `string` | n/a | yes |
 | <a name="input_identity_ids"></a> [identity\_ids](#input\_identity\_ids) | Specifies a list of user managed identity ids to be assigned to the VM. | `list(string)` | `[]` | no |
 | <a name="input_identity_type"></a> [identity\_type](#input\_identity\_type) | The Managed Service Identity Type of this Virtual Machine. | `string` | n/a | yes |
 | <a name="input_location"></a> [location](#input\_location) | (Optional) The location in which the resources will be created. | `string` | n/a | yes |
 | <a name="input_nested_data_disks"></a> [nested\_data\_disks](#input\_nested\_data\_disks) | (Optional) When `true`, use nested data disks directly attached to the VM.  When `false`, use azurerm\_virtual\_machine\_data\_disk\_attachment resource to attach the data disks after the VM is created.  Default is `true`. | `bool` | n/a | yes |
 | <a name="input_network_access_policy"></a> [network\_access\_policy](#input\_network\_access\_policy) | Policy for accessing the disk via network. | `string` | n/a | yes |
 | <a name="input_os_image_referance"></a> [os\_image\_referance](#input\_os\_image\_referance) | An example variable | `map` | `{}` | no |
-| <a name="input_os_type"></a> [os\_type](#input\_os\_type) | (required) Operating System. Possible values Linux or Windows | `string` | n/a | yes |
 | <a name="input_provision_vm_agent"></a> [provision\_vm\_agent](#input\_provision\_vm\_agent) | (Optional) Should the Azure Virtual Machine Guest Agent be installed on this Virtual Machine? Defaults to false | `bool` | `false` | no |
 | <a name="input_public_network_access_enabled"></a> [public\_network\_access\_enabled](#input\_public\_network\_access\_enabled) | Whether it is allowed to access the disk via public network. Defaults to true | `string` | n/a | yes |
 | <a name="input_resource_group_name"></a> [resource\_group\_name](#input\_resource\_group\_name) | The name of the resource group in which the resources will be created. | `string` | n/a | yes |
+| <a name="input_size"></a> [size](#input\_size) | Specifies the size of the virtual machine. | `string` | n/a | yes |
+| <a name="input_source_image_id"></a> [source\_image\_id](#input\_source\_image\_id) | (Optional) The ID of the Image which this Virtual Machine should be created from. Changing this forces a new resource to be created. Possible Image ID types include Image IDs, Shared Image IDs, Shared Image Version IDs, Community Gallery Image IDs, Community Gallery Image Version IDs, Shared Gallery Image IDs and Shared Gallery Image Version IDs | `string` | n/a | yes |
 | <a name="input_subscription_id"></a> [subscription\_id](#input\_subscription\_id) | (Optional) Specifies the subscription\_id | `string` | `"xxx-xxx-xxx-xxx-xxx"` | no |
 | <a name="input_tags"></a> [tags](#input\_tags) | A map of the tags to use on the resources that are deployed with this module. | `map(string)` | <pre>{<br>  "source": "terraform"<br>}</pre> | no |
 | <a name="input_team_name"></a> [team\_name](#input\_team\_name) | team name. Please specify your team name | `string` | n/a | yes |
@@ -423,8 +397,8 @@ output "virtual_machine_extension_name" {
 | <a name="input_vm_extensions"></a> [vm\_extensions](#input\_vm\_extensions) | (Optional) List of extra data disks attached to each virtual machine. | `list` | `[]` | no |
 | <a name="input_vm_hostname"></a> [vm\_hostname](#input\_vm\_hostname) | local name of the Virtual Machine. | `string` | `"myvm"` | no |
 | <a name="input_vm_os_version"></a> [vm\_os\_version](#input\_vm\_os\_version) | The version of the image that you want to deploy. This is ignored when vm\_os\_id or vm\_os\_simple are provided. | `string` | `"latest"` | no |
-| <a name="input_vm_size"></a> [vm\_size](#input\_vm\_size) | Specifies the size of the virtual machine. | `string` | n/a | yes |
 | <a name="input_vnet_subnet_id"></a> [vnet\_subnet\_id](#input\_vnet\_subnet\_id) | The subnet id of the virtual network where the virtual machines will reside. | `string` | n/a | yes |
+| <a name="input_write_accelerator_enabled"></a> [write\_accelerator\_enabled](#input\_write\_accelerator\_enabled) | (Optional) Are automatic updates enabled on this Virtual Machine? Defaults to false. | `bool` | n/a | yes |
 | <a name="input_zone"></a> [zone](#input\_zone) | (Optional) The Availability Zone which the Virtual Machine should be allocated in, only one zone would be accepted. If set then this module won't create `azurerm_availability_set` resource. Changing this forces a new resource to be created. | `string` | `null` | no |
 | <a name="input_zones"></a> [zones](#input\_zones) | An example variable | `list` | `[]` | no |
 
@@ -434,12 +408,6 @@ output "virtual_machine_extension_name" {
 |------|-------------|
 | <a name="output_extra_disks_name"></a> [extra\_disks\_name](#output\_extra\_disks\_name) | n/a |
 | <a name="output_network_interface_name"></a> [network\_interface\_name](#output\_network\_interface\_name) | The name of the network\_interface\_name |
-| <a name="output_os_disk_access_id"></a> [os\_disk\_access\_id](#output\_os\_disk\_access\_id) | The name of the os\_disk\_access\_id |
-| <a name="output_os_disk_gallery_image_reference_id"></a> [os\_disk\_gallery\_image\_reference\_id](#output\_os\_disk\_gallery\_image\_reference\_id) | The name of the os\_disk\_gallery\_image\_reference\_id |
-| <a name="output_os_disk_name"></a> [os\_disk\_name](#output\_os\_disk\_name) | The name of the disk name. |
-| <a name="output_os_disk_network_access_policy"></a> [os\_disk\_network\_access\_policy](#output\_os\_disk\_network\_access\_policy) | The name of the os\_disk\_network\_access\_policy |
-| <a name="output_os_disk_public_network_access_enabled"></a> [os\_disk\_public\_network\_access\_enabled](#output\_os\_disk\_public\_network\_access\_enabled) | The name of the os\_disk\_public\_network\_access\_enabled |
-| <a name="output_os_disk_size_gb"></a> [os\_disk\_size\_gb](#output\_os\_disk\_size\_gb) | The name of the os\_disk\_size\_gb |
 | <a name="output_virtual_machine_extension_name"></a> [virtual\_machine\_extension\_name](#output\_virtual\_machine\_extension\_name) | The name of the virtual\_machine\_extension |
 | <a name="output_virtual_machine_location"></a> [virtual\_machine\_location](#output\_virtual\_machine\_location) | The name of the virtual\_machine\_location |
 | <a name="output_virtual_machine_name"></a> [virtual\_machine\_name](#output\_virtual\_machine\_name) | The name of the virtual\_machine\_name |
