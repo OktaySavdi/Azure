@@ -1,4 +1,4 @@
-# Service Principal Module
+# Keyvault Module
 
 Terraform module to deploye a azure key vault and assign admin policy.
 
