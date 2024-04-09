@@ -55,7 +55,30 @@ variable "assignments" {
 }
 
 ```
+```hcl
+# providers.tf configuration
+terraform {
+  required_providers {
+    azurerm = {
+      source = "hashicorp/azurerm"
+      version = "3.97.1"
+    }
+  }
+  backend "azurerm" {
+    resource_group_name  = "<rg_name>"
+    storage_account_name = "<sa_name>"
+    container_name       = "<container_name>"
+    key                  = "/subscription/<sub_name>/prod/IAM/terraform.tfstate"
+  }
 
+}
+
+provider "azurerm" {
+  subscription_id        = "xxx-xxx-xxx-xxx-xxx"
+  tenant_id              = "xxx-xxx-xxx-xxx-xxx"
+  features {}
+}
+```
 ```hcl
 # output configuration
 
