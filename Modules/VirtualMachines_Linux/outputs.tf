@@ -5,17 +5,17 @@ output "network_interface_name" {
 
 output "virtual_machine_name" {
   description = "The name of the virtual_machine_name"
-  value       = azurerm_windows_virtual_machine.win_vm.name
+  value       = azurerm_linux_virtual_machine.linux_vm.name
 }
 
 output "virtual_machine_location" {
   description = "The name of the virtual_machine_location"
-  value       = azurerm_windows_virtual_machine.win_vm.location
+  value       = azurerm_linux_virtual_machine.linux_vm.location
 }
 
 output "virtual_machine_vm_size" {
   description = "The name of the vm_size"
-  value       = azurerm_windows_virtual_machine.win_vm.size
+  value       = azurerm_linux_virtual_machine.linux_vm.size
 }
 
 output "extra_disks_name" {
