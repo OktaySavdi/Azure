@@ -3,29 +3,6 @@ data "azurerm_disk_access" "disk_access" {
   resource_group_name = var.disk_access_resource_group_name
 }
 
-data "azurerm_platform_image" "vm" {
-  location  = var.location
-  publisher = var.vm_os_publisher
-  offer     = var.vm_os_offer
-  sku       = var.vm_os_sku
-}
-
-resource "azurerm_managed_disk" "os_disk" {
-  name                 = "az-disk-${var.vm_hostname}-${var.team_name}-${var.environment}"
-  location             = var.location
-  resource_group_name  = var.resource_group_name
-  storage_account_type = var.data_sa_type
-  create_option        = "FromImage"
-  image_reference_id   = data.azurerm_platform_image.vm.id
-
-  disk_size_gb = var.data_disk_size_gb
-  tags         = var.tags
-
-  network_access_policy         = var.network_access_policy
-  disk_access_id                = data.azurerm_disk_access.disk_access.id
-  public_network_access_enabled = var.public_network_access_enabled
-}
-
 resource "azurerm_network_interface" "vm" {
   location                      = var.location
   name                          = "az-nic-${var.vm_hostname}-${var.team_name}-${var.environment}"
@@ -52,74 +29,64 @@ resource "azurerm_availability_set" "vm" {
   tags                         = var.tags
 }
 
-resource "azurerm_virtual_machine" "vm_linux" {
-  location                         = var.location
-  name                             = "az-vm-${var.vm_hostname}-${var.team_name}-${var.environment}"
-  network_interface_ids            = ["${azurerm_network_interface.vm.id}"]
-  resource_group_name              = var.resource_group_name
-  vm_size                          = var.vm_size
-  availability_set_id              = var.availability_set_enabled ? azurerm_availability_set.vm[0].id : null
-  delete_data_disks_on_termination = var.delete_data_disks_on_termination
-  delete_os_disk_on_termination    = var.delete_os_disk_on_termination
-  zones                            = var.availability_set_enabled ? null : var.zones
-  tags                             = var.tags
+#---------------------------------------
+# Linux Virutal machine
+#---------------------------------------
+resource "azurerm_linux_virtual_machine" "linux_vm" {
+  name                         = "az-vm-${var.vm_hostname}-${var.team_name}-${var.environment}"
+  computer_name                = var.vm_hostname
+  resource_group_name          = var.resource_group_name
+  location                     = var.location
+  size                         = var.size
+  disable_password_authentication = var.disable_password_authentication
+  admin_username               = var.admin_username
+  admin_password               = var.admin_password
+  network_interface_ids        = ["${azurerm_network_interface.vm.id}"]
+  source_image_id              = var.source_image_id != null ? var.source_image_id : null
+  provision_vm_agent           = true
+  allow_extension_operations   = true
+  #secure_boot_enabled          = true
+  availability_set_id          = var.availability_set_enabled ? azurerm_availability_set.vm[0].id : null
+  zone                         = var.zone
+  tags                         = var.tags
 
-  #storage_image_reference {
-  #  publisher = var.vm_os_publisher
-  #  offer     = var.vm_os_offer
-  #  sku       = var.vm_os_sku
-  #  version   = "latest"
-  #}
-
-  storage_os_disk {
-    create_option   = "Attach"
-    name            = "az-disk-${var.vm_hostname}-${var.team_name}-${var.environment}"
-    caching         = "ReadWrite"
-    managed_disk_id = azurerm_managed_disk.os_disk.id
-    os_type         = var.os_type
-  }
-
-  dynamic "identity" {
-    for_each = length(var.identity_ids) == 0 && var.identity_type == "SystemAssigned" ? [var.identity_type] : []
-
+  dynamic "admin_ssh_key" {
+    for_each = var.disable_password_authentication ? [1] : []
     content {
-      type = var.identity_type
+      username   = var.admin_username
+      public_key = var.admin_ssh_key_data == null ? tls_private_key.rsa[0].public_key_openssh : file("/home/${var.admin_username}/.ssh/authorized_keys")
     }
   }
-  dynamic "identity" {
-    for_each = length(var.identity_ids) > 0 || var.identity_type == "UserAssigned" ? [var.identity_type] : []
 
+  dynamic "source_image_reference" {
+    for_each = var.source_image_id != null ? [] : [1]
+    content {
+      publisher = var.os_image_referance != null ? var.vm_os_publisher : null
+      offer     = var.os_image_referance != null ? var.vm_os_offer : null
+      sku       = var.os_image_referance != null ? var.vm_os_sku : null
+      version   = var.os_image_referance != null ? var.vm_os_version : null
+    }
+  }
+
+  os_disk {
+    storage_account_type      = var.data_sa_type
+    caching                   = "ReadWrite"
+    disk_size_gb              = var.data_disk_size_gb
+    name                      = "az-disk-${var.vm_hostname}-${var.team_name}-${var.environment}"
+  }
+
+  dynamic "identity" {
+    for_each = var.identity_type != null ? [1] : []
     content {
       type         = var.identity_type
-      identity_ids = length(var.identity_ids) > 0 ? var.identity_ids : []
-    }
-  }
-
-  #os_profile { # https://learn.microsoft.com/en-us/azure/virtual-machines/troubleshooting-shared-images#creating-or-updating-a-vm-or-scale-sets-from-an-image-version
-  #  admin_username = var.admin_username
-  #  computer_name  = "az-vm-${var.vm_hostname}-${var.team_name}-${var.environment}"
-  #  admin_password = var.admin_password
-  #  #custom_data   = var.custom_data
-  #}
-
-  os_profile_linux_config {
-    disable_password_authentication = var.enable_ssh_key
-
-    dynamic "ssh_keys" {
-      for_each = var.enable_ssh_key ? var.ssh_key_values : []
-
-      content {
-        key_data = ssh_keys.value
-        path     = "/home/${var.admin_username}/.ssh/authorized_keys"
-      }
+      identity_ids = var.identity_ids == "UserAssigned" || var.identity_type == "SystemAssigned, UserAssigned" ? var.identity_ids : null
     }
   }
 
   lifecycle {
-    precondition {
-      condition     = var.nested_data_disks || var.delete_data_disks_on_termination != true
-      error_message = "`var.nested_data_disks` must be `true` when `var.delete_data_disks_on_termination` is `true`, because when you declare data disks via separate managed disk resource, you might want to preserve the data while recreating the vm instance."
-    }
+    ignore_changes = [
+      tags,
+    ]
   }
 }
 
@@ -130,7 +97,7 @@ resource "azurerm_managed_disk" "extra_disks" {
   network_access_policy         = var.network_access_policy
   disk_access_id                = data.azurerm_disk_access.disk_access.id
   public_network_access_enabled = var.public_network_access_enabled
-  os_type                       = var.os_type
+  #os_type                       = var.os_type
 
   name                 = var.extra_disks[count.index].name
   create_option        = var.extra_disks[count.index].create_option
@@ -142,12 +109,12 @@ resource "azurerm_managed_disk" "extra_disks" {
 
 resource "azurerm_virtual_machine_data_disk_attachment" "vm_extra_disk_attachments" {
   count              = length(azurerm_managed_disk.extra_disks)
-  virtual_machine_id = azurerm_virtual_machine.vm_linux.id
+  virtual_machine_id = azurerm_linux_virtual_machine.linux_vm.id
   managed_disk_id    = azurerm_managed_disk.extra_disks[count.index].id
   lun                = count.index
   caching            = "ReadWrite"
 
-  depends_on = [azurerm_managed_disk.extra_disks, azurerm_virtual_machine.vm_linux]
+  depends_on = [azurerm_managed_disk.extra_disks, azurerm_linux_virtual_machine.linux_vm]
 }
 
 resource "azurerm_virtual_machine_extension" "extension" {
@@ -156,42 +123,11 @@ resource "azurerm_virtual_machine_extension" "extension" {
   publisher                   = var.vm_extensions[count.index].publisher
   type                        = var.vm_extensions[count.index].type
   type_handler_version        = var.vm_extensions[count.index].type_handler_version
-  virtual_machine_id          = azurerm_virtual_machine.vm_linux.id
+  virtual_machine_id          = azurerm_linux_virtual_machine.linux_vm.id
   auto_upgrade_minor_version  = var.vm_extensions[count.index].auto_upgrade_minor_version
   automatic_upgrade_enabled   = var.vm_extensions[count.index].automatic_upgrade_enabled
   failure_suppression_enabled = var.vm_extensions[count.index].failure_suppression_enabled
   settings                    = var.vm_extensions[count.index].settings
 
-  depends_on = [azurerm_virtual_machine.vm_linux, azurerm_managed_disk.extra_disks]
+  depends_on = [azurerm_linux_virtual_machine.linux_vm, azurerm_managed_disk.extra_disks]
 }
-
-resource "null_resource" "reset_password" {
-  triggers = {
-    id = azurerm_virtual_machine.vm_linux.id
-  }
-  provisioner "local-exec" {
-    command = <<EOT
-    subscriptionId = $ARM_SUBSCRIPTION_ID
-    tenantId = $ARM_TENANT_ID
-    clientId = $ARM_CLIENT_ID
-    secret = $ARM_CLIENT_SECRET
-
-    az login --service-principal --username $clientId --password $secret --tenant $tenantId
-    az account set --subscription ${var.subscription_id}
-    az vm user update --resource-group ${var.resource_group_name} --name ${format("az-vm-%s-%s-%s", var.vm_hostname, var.team_name, var.environment)} --username ${var.admin_username} --password ${var.admin_password}
-    EOT
-  }
-  depends_on = [azurerm_virtual_machine.vm_linux, azurerm_virtual_machine_data_disk_attachment.vm_extra_disk_attachments, azurerm_virtual_machine_extension.extension ]
-}
-
-# Use a null_resource to call az command to set disk access on the disk, only trigger when vm id is changed
-#resource "null_resource" "update_disk_access" {
-#  triggers = {
-#    id = azurerm_virtual_machine.vm_linux.id
-#  }
-#
-#  provisioner "local-exec" {
-#    command = "az disk update --resource-group ${var.resource_group_name} --name az-disk-${var.vm_hostname}-${var.team_name}-${var.environment} --network-access-policy ${var.network_access_policy} --disk-access ${data.azurerm_disk_access.disk_access.id}"
-#  }
-#  depends_on = [ azurerm_virtual_machine.vm_linux ]
-#}
