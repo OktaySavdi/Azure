@@ -11,7 +11,7 @@ provider "azurerm" {
 }
 
 module "service_principal" {
-  source  = "git::https://<git_address>/hce-public/modules.git//ServicePrincipal"
+  source  = "git::https://<git_address>/hce-public/modules.git//ServicePrincipal?ref=v3.97.1""
 
   service_principal_name   = var.service_principal_name
   service_principal_owner  = var.service_principal_owner
