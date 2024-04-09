@@ -96,7 +96,7 @@ variable "vm_hostname" {
   default     = "myvm"
 }
 
-variable "vm_size" {
+variable "size" {
   type        = string
   description = "Specifies the size of the virtual machine."
 }
@@ -115,11 +115,6 @@ variable "team_name" {
 variable "environment" {
   description = "Environment name. Possible values are stg and prod"
   type        = string
-}
-
-variable "os_type" {
-  type        = string
-  description = "(required) Operating System. Possible values Linux or Windows"
 }
 
 variable "network_access_policy" {
@@ -167,9 +162,22 @@ variable "extra_disks" {
   default     = []
 }
 
-variable "zones" {
-  description = "An example variable"
-  default     = []
+variable "vm_os_publisher" {
+  type        = string
+  default     = ""
+  description = "The name of the publisher of the image that you want to deploy. This is ignored when vm_os_id or vm_os_simple are provided."
+}
+
+variable "vm_os_offer" {
+  type        = string
+  default     = ""
+  description = "Specify UbuntuServer, WindowsServer, RHEL, openSUSE-Leap, CentOS, Debian, CoreOS and SLES to get the latest image version of the specified os.  Do not provide this value if a custom value is used for vm_os_publisher, vm_os_offer, and vm_os_sku."
+}
+
+variable "vm_os_sku" {
+  type        = string
+  default     = ""
+  description = "The sku of the image that you want to deploy. This is ignored when vm_os_id or vm_os_simple are provided."
 }
 
 variable "vm_extensions" {
@@ -179,11 +187,6 @@ variable "vm_extensions" {
 
 variable "public_network_access_enabled" {
   description = "Whether it is allowed to access the disk via public network. Defaults to true"
-  type        = string
-}
-
-variable "gallery_image_reference_id" {
-  description = "(Optional) ID of a Gallery Image Version to copy when create_option is FromImage. This field cannot be specified if image_reference_id is specified. Changing this forces a new resource to be created."
   type        = string
 }
 
@@ -209,4 +212,24 @@ variable "subscription_id" {
   description = "(Optional) Specifies the subscription_id"
   type        = string
   default     = "xxx-xxx-xxx-xxx-xxx"
+}
+
+variable "admin_password" {
+  description = " (Required) The Password which should be used for the local-administrator on this Virtual Machine. Changing this forces a new resource to be created."
+  type        = string
+}
+
+variable "admin_username" {
+  description = " (Required) The username of the local administrator used for the Virtual Machine. Changing this forces a new resource to be created."
+  type        = string
+}
+
+variable "source_image_id" {
+  description = "(Optional) The ID of the Image which this Virtual Machine should be created from. Changing this forces a new resource to be created. Possible Image ID types include Image IDs, Shared Image IDs, Shared Image Version IDs, Community Gallery Image IDs, Community Gallery Image Version IDs, Shared Gallery Image IDs and Shared Gallery Image Version IDs"
+  type        = string
+}
+
+variable "write_accelerator_enabled" {
+  description = "(Optional) Are automatic updates enabled on this Virtual Machine? Defaults to false."
+  type        = bool
 }
