@@ -645,6 +645,7 @@ resource "azurerm_kubernetes_cluster_node_pool" "nodepool" {
   max_count                = try(each.value.max_count, null)
   max_pods                 = try(each.value.max_pods, 250)
   priority                 = try(each.value.priority, null)
+  os_sku                   = try(each.value.os_sku, "Ubuntu")
   eviction_policy          = try(each.value.eviction_policy, null)
   vnet_subnet_id           = each.value.vnet_subnet_id
   zones                    = try(each.value.availability_zones, null)
