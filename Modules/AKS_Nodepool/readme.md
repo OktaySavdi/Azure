@@ -53,11 +53,11 @@ variable "node_pools" {
       min_count                = 0
       max_count                = 0
       max_pods                 = 256
-      zones                    = []
+      zones                    = ["1", "2", "3"]
       enable_node_public_ip    = false
       node_public_ip_prefix_id = null
-      node_labels              = {}
-      node_taints              = []
+      node_labels              = { "workload" = "example2-public" }
+      node_taints              = ["dedicated=redis:NoSchedule"]
       enable_host_encryption   = false
       max_pods                 = 128
       vnet_subnet_id           = "/subscriptions/<subscription_id>/resourceGroups/<resource_group_name>/providers/Microsoft.Network/virtualNetworks/<vnet_name>/subnets/<subnet_name>"
