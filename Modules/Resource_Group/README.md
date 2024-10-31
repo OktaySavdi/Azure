@@ -1,7 +1,7 @@
 **main.tf**
 ```hcl
 module "Resource_Groups" {
-  source = "git::https://ato-hce-git1.gtoffice.lan/hce-public/modules.git//Resource_Group?ref=v3.114.0"
+  source = "git::https://<myrepo>/hce-public/modules.git//Resource_Group?ref=v3.114.0"
 
   rg = [
     {
